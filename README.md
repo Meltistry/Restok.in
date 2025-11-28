@@ -266,7 +266,7 @@ File-file ini sudah ditambahkan ke `.gitignore`.
 
 ## 📝 License
 
-Copyright © 2024 ReStock.in Team
+Copyright © 2025 ReStock.in Team
 
 ---
 
