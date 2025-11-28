@@ -7,7 +7,7 @@ import 'core/config/supabase_config.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Supabase with deep link support
   await SupabaseService.initialize(
     url: SupabaseConfig.supabaseUrl,
