@@ -266,7 +266,7 @@ File-file ini sudah ditambahkan ke `.gitignore`.
 
 ## 📝 License
 
-Copyright © 2025 ReStock.in Team
+Copyright © 2025 ReStock.in Team (by Kelompok 8 Teknologi Berkembang - B)
 
 ---
 
