@@ -24,3 +24,5 @@ void main() async {
 
   runApp(const RestokInApp());
 }
+
+final supabase = Supabase.instance.client;
