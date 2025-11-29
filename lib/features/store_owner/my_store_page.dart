@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:restokin/features/store_owner/add_store_items_page.dart';
 import '../../state/store_provider.dart';
 import '../../state/auth_provider.dart';
 import 'create_store_page.dart';
@@ -22,15 +23,51 @@ class _MyStorePageState extends State<MyStorePage> {
       _loadStores();
     });
   }
+  //final loadstore
+  // void _loadStores() {
+  //   final authProvider = context.read<AuthProvider>();
+  //   final String? userIdString =
+  //       authProvider.user?.id; // String ID dari Supabase User
+
+  //   if (userIdString == null) {
+  //     // BARU: Tampilkan notifikasi jika User ID NULL (User Belum Login)
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Anda belum login. Gagal memuat toko.'),
+  //         backgroundColor: Color.fromARGB(255, 230, 100, 100),
+  //       ),
+  //     );
+  //     return; // Penting: Hentikan eksekusi jika ID null
+  //   }
+
+  //   // Konversi String menjadi int (Sesuai dengan StoreProvider Anda)
+  //   final int? userIdInt = int.tryParse(userIdString);
+
+  //   if (userIdInt != null) {
+  //     context.read<StoreProvider>().loadUserStores(userIdInt);
+  //   } else {
+  //     // BARU: Tampilkan notifikasi jika konversi gagal
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Error: ID pengguna tidak valid (bukan integer).'),
+  //         backgroundColor: Color.fromARGB(255, 230, 100, 100),
+  //       ),
+  //     );
+  //     print("Error: User ID is not a valid integer.");
+  //   }
+  // }
+
+  // lib/features/store_owner/my_store_page.dart (Fungsi _loadStores)
 
   void _loadStores() {
-    // final authProvider = context.read<AuthProvider>();
-    final userId = 1;
-    // authProvider.currentUser?.idUser;
+    // START: HARDCODED USER ID UNTUK TESTING
 
-    if (userId != null) {
-      context.read<StoreProvider>().loadUserStores(userId);
-    }
+    // 1. Definisikan User ID Hardcoded
+    // Karena StoreProvider  meminta 'int', saya gunakan 1.
+    const int userIdInt = 1;
+
+    // 2. Langsung panggil fungsi pemuatan data
+    context.read<StoreProvider>().loadUserStores(userIdInt);
   }
 
   @override
@@ -224,10 +261,9 @@ class _MyStorePageState extends State<MyStorePage> {
           final result = await Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => EditStorePage(store: store),
+              builder: (context) => AddStoreItemsPage(store: store),
             ),
           );
-
           if (result == true) {
             _loadStores();
           }

@@ -12,9 +12,9 @@ class StoreService {
   Future<List<StoreModel>> getUserStores(int userId) async {
     try {
       final response = await _supabase
-          .from('Store')
+          .from('stores')
           .select()
-          .eq('idUser(FK)', userId)
+          .eq('id_user', userId)
           .order('created_at', ascending: false);
 
       return (response as List)
@@ -29,9 +29,9 @@ class StoreService {
   Future<StoreModel> getStoreById(int storeId) async {
     try {
       final response = await _supabase
-          .from('Store')
+          .from('stores')
           .select()
-          .eq('idStore(PK)', storeId)
+          .eq('id_store', storeId)
           .single();
 
       return StoreModel.fromJson(response);
@@ -44,7 +44,7 @@ class StoreService {
   Future<StoreModel> createStore(StoreModel store) async {
     try {
       final response = await _supabase
-          .from('Store')
+          .from('stores')
           .insert(store.toJson())
           .select()
           .single();
@@ -59,9 +59,9 @@ class StoreService {
   Future<StoreModel> updateStore(StoreModel store) async {
     try {
       final response = await _supabase
-          .from('Store')
+          .from('stores')
           .update(store.toJson())
-          .eq('idStore(PK)', store.idStore!)
+          .eq('id_store', store.idStore!)
           .select()
           .single();
 
@@ -74,7 +74,7 @@ class StoreService {
   // Delete store
   Future<void> deleteStore(int storeId) async {
     try {
-      await _supabase.from('Store').delete().eq('idStore(PK)', storeId);
+      await _supabase.from('stores').delete().eq('id_store', storeId);
     } catch (e) {
       throw Exception('Failed to delete store: $e');
     }
@@ -86,9 +86,9 @@ class StoreService {
   Future<List<ItemModel>> getStoreItems(int storeId) async {
     try {
       final response = await _supabase
-          .from('Item')
+          .from('items')
           .select()
-          .eq('idStore(FK)', storeId)
+          .eq('id_store', storeId)
           .order('created_at', ascending: false);
 
       return (response as List)
@@ -103,7 +103,7 @@ class StoreService {
   Future<ItemModel> createItem(ItemModel item) async {
     try {
       final response = await _supabase
-          .from('Item')
+          .from('items')
           .insert(item.toJson())
           .select()
           .single();
@@ -118,9 +118,9 @@ class StoreService {
   Future<ItemModel> updateItem(ItemModel item) async {
     try {
       final response = await _supabase
-          .from('Item')
+          .from('items')
           .update(item.toJson())
-          .eq('idItem(PK)', item.idItem!)
+          .eq('id_item', item.idItem!)
           .select()
           .single();
 
@@ -133,7 +133,7 @@ class StoreService {
   // Delete item
   Future<void> deleteItem(int itemId) async {
     try {
-      await _supabase.from('Item').delete().eq('idItem(PK)', itemId);
+      await _supabase.from('items').delete().eq('id_item', itemId);
     } catch (e) {
       throw Exception('Failed to delete item: $e');
     }

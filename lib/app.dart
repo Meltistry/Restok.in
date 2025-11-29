@@ -4,6 +4,7 @@ import 'core/theme/app_theme.dart';
 import 'features/auth/login_page.dart';
 import 'features/auth/register_page.dart';
 import 'features/profile/create_profile_page.dart';
+import 'features/store_owner/my_store_page.dart';
 
 class RestokInApp extends StatelessWidget {
   const RestokInApp({super.key});
@@ -21,6 +22,7 @@ class RestokInApp extends StatelessWidget {
         '/login': (_) => const LoginPage(),
         '/register': (_) => const RegisterPage(),
         '/create-profile': (_) => const CreateProfilePage(),
+        '/my-store': (_) => const MyStorePage(),
       },
     );
   }

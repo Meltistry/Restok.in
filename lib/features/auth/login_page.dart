@@ -38,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Login berhasil (dummy). Implement auth!')),
     );
-    // Navigator.pushReplacementNamed(context, '/home');
+    //Navigator.pushReplacementNamed(context, '/home');
   }
 
   void _goToRegister() {

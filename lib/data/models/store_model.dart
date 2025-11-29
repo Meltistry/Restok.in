@@ -21,11 +21,11 @@ class StoreModel {
 
   factory StoreModel.fromJson(Map<String, dynamic> json) {
     return StoreModel(
-      idStore: json['idStore(PK)'] as int?,
-      idUser: json['idUser(FK)'] as int?,
-      storeName: json['storeName'] as String? ?? '',
-      storeAddress: json['storeAddress'] as String? ?? '',
-      storeEpic: json['storeEpic'] as String?,
+      idStore: json['id_store'] as int?,
+      idUser: json['id_user'] as int?,
+      storeName: json['store_name'] as String? ?? '',
+      storeAddress: json['store_address'] as String? ?? '',
+      storeEpic: json['store_epic'] as String?,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -37,11 +37,11 @@ class StoreModel {
 
   Map<String, dynamic> toJson() {
     return {
-      if (idStore != null) 'idStore(PK)': idStore,
-      if (idUser != null) 'idUser(FK)': idUser,
-      'storeName': storeName,
-      'storeAddress': storeAddress,
-      if (storeEpic != null) 'storeEpic': storeEpic,
+      if (idStore != null) 'id_store': idStore,
+      if (idUser != null) 'id_user': idUser,
+      'store_name': storeName,
+      'store_address': storeAddress,
+      if (storeEpic != null) 'store_epic': storeEpic,
     };
   }
 

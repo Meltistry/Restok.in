@@ -19,10 +19,10 @@ class ItemModel {
 
   factory ItemModel.fromJson(Map<String, dynamic> json) {
     return ItemModel(
-      idItem: json['idItem(PK)'] as int?,
-      idStore: json['idStore(FK)'] as int?,
-      itemName: json['itemName'] as String? ?? '',
-      itemPrice: json['itemPrice'] as int? ?? 0,
+      idItem: json['id_item'] as int?,
+      idStore: json['id_store'] as int?,
+      itemName: json['item_name'] as String? ?? '',
+      itemPrice: json['item_price'] as int? ?? 0,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,
@@ -34,10 +34,10 @@ class ItemModel {
 
   Map<String, dynamic> toJson() {
     return {
-      if (idItem != null) 'idItem(PK)': idItem,
-      if (idStore != null) 'idStore(FK)': idStore,
-      'itemName': itemName,
-      'itemPrice': itemPrice,
+      if (idItem != null) 'id_item': idItem,
+      if (idStore != null) 'id_store': idStore,
+      'item_name': itemName,
+      'item_price': itemPrice,
     };
   }
 

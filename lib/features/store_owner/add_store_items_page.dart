@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/store_model.dart';
 import '../../state/store_provider.dart';
+import 'edit_store_page.dart';
 
 class AddStoreItemsPage extends StatefulWidget {
   final StoreModel store;
@@ -112,6 +113,13 @@ class _AddStoreItemsPageState extends State<AddStoreItemsPage> {
                 TextButton(
                   onPressed: () {
                     // Navigate to edit store
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            EditStorePage(store: widget.store),
+                      ),
+                    );
                   },
                   style: TextButton.styleFrom(
                     backgroundColor: const Color(0xFF7B68A6),
@@ -121,7 +129,7 @@ class _AddStoreItemsPageState extends State<AddStoreItemsPage> {
                     ),
                   ),
                   child: const Text(
-                    'Edit',
+                    'edit',
                     style: TextStyle(color: Colors.white),
                   ),
                 ),

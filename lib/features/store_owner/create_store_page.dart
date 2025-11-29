@@ -46,20 +46,24 @@ class _CreateStorePageState extends State<CreateStorePage> {
   Future<void> _createStore() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // final authProvider = context.read<AuthProvider>();
-    final userId = 1;
+    // ===============================================
+    // START: HARDCODED USER ID = 1 UNTUK TESTING
 
-    if (userId == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('User not authenticated')));
-      return;
-    }
+    // dan konversi String ke Int dihilangkan sementara.
+    // ===============================================
+
+    // Definisikan User ID hardcoded
+    const int userIdInt = 1;
+
+    // ===============================================
+    // END: HARDCODED USER ID
+    // ===============================================
 
     final storeProvider = context.read<StoreProvider>();
 
     final success = await storeProvider.createStore(
-      userId: userId,
+      // Gunakan ID yang di-hardcode
+      userId: userIdInt,
       storeName: _storeNameController.text.trim(),
       storeAddress: _storeAddressController.text.trim(),
       storeImagePath: _selectedImage?.path,
@@ -81,6 +85,55 @@ class _CreateStorePageState extends State<CreateStorePage> {
       );
     }
   }
+
+  //final create store
+  // Future<void> _createStore() async {
+  //   if (!_formKey.currentState!.validate()) return;
+
+  //   final authProvider = context.read<AuthProvider>();
+  //   final String? userIdString = authProvider.user?.id;
+  //   if (userIdString == null) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Error: User not authenticated')),
+  //     );
+  //     return;
+  //   }
+  //   // Konversi String ke int (jika FK di DB Anda INT)
+  //   final int? userIdInt = int.tryParse(userIdString);
+
+  //   if (userIdInt == null) {
+  //     // Jika konversi gagal (jarang, tapi mungkin)
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Error: Invalid User ID format')),
+  //     );
+  //     return;
+  //   }
+
+  //   final storeProvider = context.read<StoreProvider>();
+
+  //   final success = await storeProvider.createStore(
+  //     userId: userIdInt,
+  //     storeName: _storeNameController.text.trim(),
+  //     storeAddress: _storeAddressController.text.trim(),
+  //     storeImagePath: _selectedImage?.path,
+  //   );
+
+  //   if (!mounted) return;
+
+  //   if (success) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Store created successfully!')),
+  //     );
+  //     Navigator.pop(context, true);
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       SnackBar(
+  //         content: Text(storeProvider.error ?? 'Failed to create store'),
+  //         backgroundColor: Colors.red,
+  //       ),
+  //     );
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
