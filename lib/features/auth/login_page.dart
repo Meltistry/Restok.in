@@ -38,7 +38,7 @@ class _LoginPageState extends State<LoginPage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Login berhasil (dummy). Implement auth!')),
     );
-    // Navigator.pushReplacementNamed(context, '/home');
+    //Navigator.pushReplacementNamed(context, '/home');
   }
 
   void _goToRegister() {
@@ -48,14 +48,14 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _handleGoogleSignIn() async {
     try {
       setState(() => _isSubmitting = true);
-      
+
       // Implementasi Google Sign In
       final authService = AuthService();
       final success = await authService.signInWithGoogle();
-      
+
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      
+
       if (success) {
         // Navigate to home after successful login
         // Navigator.pushReplacementNamed(context, '/home');
@@ -116,11 +116,12 @@ class _LoginPageState extends State<LoginPage> {
                       child: Image.asset(
                         'assets/icons/Logo ReStock.in.png',
                         height: 180,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.store,
-                          size: 120,
-                          color: Color(0xFF008B8B),
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.store,
+                              size: 120,
+                              color: Color(0xFF008B8B),
+                            ),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -182,8 +183,7 @@ class _LoginPageState extends State<LoginPage> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
-                        },
+                        onPressed: () {},
                         child: const Text('Forgot password?'),
                       ),
                     ),
@@ -198,10 +198,7 @@ class _LoginPageState extends State<LoginPage> {
                     Row(
                       children: [
                         const Expanded(
-                          child: Divider(
-                            color: Colors.white38,
-                            thickness: 1,
-                          ),
+                          child: Divider(color: Colors.white38, thickness: 1),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -213,10 +210,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         const Expanded(
-                          child: Divider(
-                            color: Colors.white38,
-                            thickness: 1,
-                          ),
+                          child: Divider(color: Colors.white38, thickness: 1),
                         ),
                       ],
                     ),
@@ -228,16 +222,20 @@ class _LoginPageState extends State<LoginPage> {
                         'assets/icons/Logo Google.png',
                         height: 24,
                         width: 24,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.g_mobiledata,
-                          size: 24,
-                          color: Colors.white,
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.g_mobiledata,
+                              size: 24,
+                              color: Colors.white,
+                            ),
                       ),
                       label: const Text('Continue with Google'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white38, width: 1.5),
+                        side: const BorderSide(
+                          color: Colors.white38,
+                          width: 1.5,
+                        ),
                         minimumSize: const Size.fromHeight(52),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),
