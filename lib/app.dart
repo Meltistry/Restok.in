@@ -10,6 +10,7 @@ import 'features/profile/profile_menu_page.dart';
 import 'features/profile/edit_profile_page.dart';
 import 'features/profile/change_password_page.dart';
 import 'features/profile/payment_methods_page.dart';
+import 'features/profile/add_payment_method_page.dart';
 
 class RestokInApp extends StatelessWidget {
   const RestokInApp({super.key});
@@ -33,6 +34,7 @@ class RestokInApp extends StatelessWidget {
         '/profile/edit': (_) => const EditProfilePage(),
         '/profile/changepassword': (_) => const ChangePasswordPage(),
         '/profile/paymentmethods': (_) => const PaymentMethodsPage(),
+        '/payment/add': (context) => const AddPaymentMethodPage(),
       },
     );
   }

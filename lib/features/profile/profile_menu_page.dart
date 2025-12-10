@@ -1,88 +1,137 @@
 import 'package:flutter/material.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
-class ProfilePage extends StatelessWidget {
+// Import service dan model
+import 'package:restokin/data/services/auth_service.dart';
+import 'package:restokin/data/services/user_service.dart';
+import 'package:restokin/data/models/user_model.dart';
+
+// Ubah menjadi StatefulWidget
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
-  // --- WIDGET LOGOUT DIALOG (Menggantikan Bootstrap Modal) ---
-// Di file profilepage.dart Anda, ganti seluruh body fungsi _showLogoutDialog:
-
-// Di file profilepage.dart Anda, ganti seluruh body fungsi _showLogoutDialog:
-
-void _showLogoutDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      // Menggantikan .custom-modal-content (background: #53867D)
-      return AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        backgroundColor: const Color(0xFF53867D), // #53867D
-        
-        // Header dan Konten (Sudah Benar)
-        title: const Text(
-          'Logout', 
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 32, 
-            fontWeight: FontWeight.w700, 
-            color: Colors.black 
-          ),
-        ),
-        content: const Text(
-          'Are you sure you want to logout?', 
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 16, 
-            color: Color(0xFF292D32)
-          ),
-        ),
-
-        // --- ACTIONS / TOMBOL (DIUBAH KE STACKED/VERTIKAL) ---
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.only(left: 15, right: 15, bottom: 15),
-            child: Column(
-              mainAxisSize: MainAxisSize.min, // Biarkan Column mengambil ruang seminimal mungkin
-              crossAxisAlignment: CrossAxisAlignment.stretch, // KUNCI: Membuat tombol mengambil lebar penuh
-              children: [
-                // Tombol Cancel (Menggantikan .modal-cancel-btn)
-                TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: const Color(0xFFD6F6FB), // #D6F6FB
-                    foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w600)),
-                  onPressed: () => Navigator.of(context).pop(), 
-                ),
-                
-                const SizedBox(height: 10), // Jarak antara tombol
-
-                // Tombol Logout (Menggantikan .modal-logout-btn)
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFAF4545), // #AF4545
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                  ),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    Navigator.of(context).pushNamedAndRemoveUntil('/login', (Route<dynamic> route) => false);
-                  },
-                  child: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w600)),
-                ),
-              ],
-            ),
-          ),
-        ],
-        
-        // actionsAlignment dihapus atau diabaikan karena kita menggunakan Column.
-        actionsAlignment: MainAxisAlignment.center, // Tetap gunakan ini jika Anda ingin memastikan alignment Row yang lama, tapi ini tidak relevan dengan Column
-      );
-    },
-  );
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
 }
+
+class _ProfilePageState extends State<ProfilePage> {
+  // Instance service
+  final AuthService _authService = AuthService();
+  final ProfileService _userService = ProfileService();
+
+  // State untuk data dan loading
+  UserProfile? _profile;
+  bool _isLoading = true;
+  String? _errorMessage;
+  
+  // URL avatar default jika tidak ada foto
+  final String _defaultAvatarPath = 'images/avatardefault.png';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchProfile();
+  }
+
+  // --- LOGIKA BUSINESS / DB: FETCH DATA ---
+  Future<void> _fetchProfile() async {
+    final currentUser = _authService.currentUser;
+    
+    if (currentUser == null) {
+      if (mounted) {
+        // Jika tidak ada user, redirect ke login
+        Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+      }
+      return;
+    }
+    
+    try {
+      final profileModel = await _userService.fetchProfile(currentUser.id);
+      
+      if (mounted) {
+        setState(() {
+          _profile = profileModel;
+          _isLoading = false;
+        });
+        if (profileModel == null) {
+          // Jika user login tapi tidak ada data profil di DB
+          _errorMessage = 'Profile data not found. Please complete profile setup.';
+        }
+      }
+    } on PostgrestException catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Gagal memuat profil: ${e.message}';
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Error umum: ${e.toString()}';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  // --- LOGIKA LOGOUT SEBENARNYA ---
+  void _handleLogout(BuildContext context) async {
+    // Tunjukkan dialog loading saat logout
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => const Center(child: CircularProgressIndicator(color: Color(0xFF5FC0EF))),
+    );
+    
+    await _authService.signOut();
+    
+    if (!mounted) return;
+    
+    // Hapus semua route dan navigasi ke halaman login
+    Navigator.of(context).pop(); // Tutup loading dialog
+    Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
+  }
+
+  // --- WIDGET LOGOUT DIALOG ---
+  void _showLogoutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: const Color(0xFF53867D), 
+          
+          title: const Text('Logout', textAlign: TextAlign.center, style: TextStyle(fontSize: 32, fontWeight: FontWeight.w700, color: Colors.black)),
+          content: const Text('Are you sure you want to logout?', textAlign: TextAlign.center, style: TextStyle(fontSize: 16, color: Color(0xFF292D32))),
+
+          actions: <Widget>[
+            Padding(
+              padding: const EdgeInsets.only(left: 15, right: 15, bottom: 15),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  TextButton(
+                    style: TextButton.styleFrom(backgroundColor: const Color(0xFFD6F6FB), foregroundColor: Colors.black, padding: const EdgeInsets.symmetric(vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    child: const Text('Cancel', style: TextStyle(fontWeight: FontWeight.w600)),
+                    onPressed: () => Navigator.of(context).pop(), 
+                  ),
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFAF4545), foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(vertical: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+                    onPressed: () => _handleLogout(context), // Panggil fungsi logout sesungguhnya
+                    child: const Text('Logout', style: TextStyle(fontWeight: FontWeight.w600)),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   // --- WIDGET MENU ITEM CUSTOM (Menggantikan .menu-item) ---
   Widget _buildMenuItem(
@@ -101,14 +150,13 @@ void _showLogoutDialog(BuildContext context) {
     );
 
     return Padding(
-      // Padding di kiri kanan untuk daftar menu (Menggantikan .profile-menu-list padding)
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: Column(
         children: [
           ClipRRect(
             borderRadius: borderRadius,
-            child: Material( // Menggunakan Material untuk efek hover/splash bawaan ListTile
-              color: const Color(0xFFD6F6FB), // #D6F6FB
+            child: Material(
+              color: const Color(0xFFD6F6FB),
               child: InkWell(
                 onTap: () {
                   if (route == 'logout') {
@@ -117,16 +165,13 @@ void _showLogoutDialog(BuildContext context) {
                     Navigator.of(context).pushNamed(route);
                   }
                 },
-                // Container untuk Padding & Styling Tambahan
                 child: Container(
-                  // Menggantikan padding: 15px 20px
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(
                         title,
-                        // Menggantikan font-size: 18px, font-weight: 500, color: #00687A
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w500,
@@ -144,11 +189,10 @@ void _showLogoutDialog(BuildContext context) {
               ),
             ),
           ),
-          // Garis pemisah antar item (Menggantikan border-bottom: 2px solid #4a6396)
           if (!isBottomRounded)
             Container(
               height: 2,
-              color: const Color(0xFF4a6396), // #4a6396
+              color: const Color(0xFF4a6396),
               margin: const EdgeInsets.symmetric(horizontal: 1), 
             ),
         ],
@@ -158,25 +202,44 @@ void _showLogoutDialog(BuildContext context) {
 
   @override
   Widget build(BuildContext context) {
+    // --- TAMPILAN LOADING / ERROR ---
+    if (_isLoading) {
+      return const Scaffold(
+        backgroundColor: Color(0xFF1a2847),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFF5FC0EF))),
+      );
+    }
+    
+    // Fallback data jika profil belum dibuat (tapi user login)
+    final displayProfile = _profile ?? UserProfile(
+      userId: _authService.currentUser?.id ?? '', 
+      email: _authService.currentUser?.email ?? 'Unknown',
+      username: 'Guest', 
+      nickname: 'Guest', 
+      description: _errorMessage ?? 'Please complete your profile',
+    );
+    
+    // Tentukan avatar: Menggunakan CachedNetworkImage untuk URL dari DB
+    final ImageProvider avatarImage = displayProfile.profilePic != null && displayProfile.profilePic!.isNotEmpty
+      ? CachedNetworkImageProvider(displayProfile.profilePic!)
+      : AssetImage(_defaultAvatarPath);
+
     return Scaffold(
-      // Menghapus AppBar default karena desain web menggunakan back button di body
-      // Mengatur warna status bar agar cocok dengan background
       extendBodyBehindAppBar: true, 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        toolbarHeight: 0, // Sembunyikan toolbar
+        toolbarHeight: 0,
       ),
       
       body: Container(
-        // Linear Gradient (Menggantikan body background)
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
             colors: [
-              Color(0xFF1a2847), // #1a2847
-              Color(0xFF0d1829), // #0d1829
+              Color(0xFF1a2847), 
+              Color(0xFF0d1829), 
             ],
           ),
         ),
@@ -187,56 +250,46 @@ void _showLogoutDialog(BuildContext context) {
               children: <Widget>[
                 // --- BACK BUTTON ---
                 Padding(
-                  padding: const EdgeInsets.only(left: 15.0, top: 20.0, bottom: 30.0), // Padding sesuai web: pt-4, pb-3
-                  child: InkWell( // Menggantikan .back-btn
+                  padding: const EdgeInsets.only(left: 15.0, top: 20.0, bottom: 30.0),
+                  child: InkWell(
                     onTap: () => Navigator.of(context).pop(),
                     child: Container(
                       width: 40,
                       height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: const Color(0xFF5dd9e8), width: 2), // #5dd9e8
-                      ),
-                      child: const Icon(
-                        Icons.chevron_left, 
-                        color: Color(0xFF5dd9e8), 
-                        size: 20
-                      ),
+                      decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFF5dd9e8), width: 2)),
+                      child: const Icon(Icons.chevron_left, color: Color(0xFF5dd9e8), size: 20),
                     ),
                   ),
                 ),
 
-                // --- PROFILE HEADER ---
+                // --- PROFILE HEADER (MENAMPILKAN DATA DB) ---
                 Padding(
-                  // Padding sesuai web: px-3, mb-5
                   padding: const EdgeInsets.only(left: 15.0, right: 15.0, bottom: 40.0), 
-                  child: Row( // Menggantikan .profile-header
+                  child: Row(
                     children: <Widget>[
-                      // Profile Image (Menggantikan .profile-img)
-                      const CircleAvatar(
-                        radius: 45, // 90px / 2
-                        backgroundImage: AssetImage('images/avatardefault.png'), // Path sesuai blade view
+                      // Profile Image
+                      CircleAvatar(
+                        radius: 45, 
+                        backgroundImage: avatarImage, 
                       ),
                       const SizedBox(width: 15),
-                      Column( // Menggantikan .profile-info
+                      Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const <Widget>[
-                          // User Name (Menggantikan .user-name)
+                        children: <Widget>[
+                          // User Name (Nickname)
                           Text(
-                            'Carlos',
-                            style: TextStyle(
-                              fontSize: 45,
-                              fontWeight: FontWeight.w700,
-                              color: Color(0xFF5FC0EF), // #5FC0EF
-                              height: 1.1, 
+                            displayProfile.nickname, // Menampilkan nickname dari DB
+                            style: const TextStyle(
+                              fontSize: 45, fontWeight: FontWeight.w700,
+                              color: Color(0xFF5FC0EF), height: 1.1, 
                             ),
                           ),
-                          // User Role (Menggantikan .user-role)
+                          // User Role (Description)
                           Text(
-                            'Owner of IS Store',
-                            style: TextStyle(
+                            displayProfile.description, // Menampilkan description dari DB
+                            style: const TextStyle(
                               fontSize: 16,
-                              color: Color(0xFF97E3D6), // #97E3D6
+                              color: Color(0xFF97E3D6),
                             ),
                           ),
                         ],
