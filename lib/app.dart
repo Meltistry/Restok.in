@@ -5,11 +5,11 @@ import 'features/auth/login_page.dart';
 import 'features/auth/register_page.dart';
 import 'features/profile/create_profile_page.dart';
 
-//profileScreens
-import 'profileScreens/profilepage.dart';
-import 'profileScreens/editprofilepage.dart';
-import 'profileScreens/changepasswordpage.dart';
-import 'profileScreens/paymentmethodspage.dart';
+//profile
+import 'features/profile/profile_menu_page.dart';
+import 'features/profile/edit_profile_page.dart';
+import 'features/profile/change_password_page.dart';
+import 'features/profile/payment_methods_page.dart';
 
 class RestokInApp extends StatelessWidget {
   const RestokInApp({super.key});
@@ -22,7 +22,7 @@ class RestokInApp extends StatelessWidget {
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       themeMode: ThemeMode.dark,
-      initialRoute: '/profile',
+      initialRoute: '/login',
       routes: {
         '/login': (_) => const LoginPage(),
         '/register': (_) => const RegisterPage(),
