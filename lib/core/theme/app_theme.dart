@@ -59,7 +59,11 @@ class AppTheme {
       // background utama app (navy)
       scaffoldBackgroundColor: AppColors.background,
 
-      textTheme: textTheme,
+      textTheme: textTheme.copyWith(
+        bodyMedium: textTheme.bodyMedium?.copyWith(
+          color: const Color(0xFF02173A), // input text dark navy
+        ),
+      ),
 
       appBarTheme: AppBarTheme(
         backgroundColor: Colors.transparent,
@@ -100,10 +104,16 @@ class AppTheme {
         filled: true,
         fillColor: AppColors.surface,
         hintStyle: textTheme.bodyMedium?.copyWith(
-          color: AppColors.textSecondary,
+          color: const Color(0xFF0D2A59).withValues(alpha: 0.6), // dark navy semi-transparan untuk kontras
+          fontWeight: FontWeight.w400,
         ),
         labelStyle: textTheme.bodyMedium?.copyWith(
-          color: AppColors.textSecondary,
+          color: const Color(0xFF0D2A59), // tidak dipakai lagi
+          fontWeight: FontWeight.w600,
+        ),
+        floatingLabelStyle: textTheme.bodyMedium?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
         ),
         contentPadding:
             const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
