@@ -1,49 +1,58 @@
 // lib/data/models/store_model.dart
 
 class StoreModel {
-  final int idStore;
-  final int idUser;
+  final int? idStore;
+  final int? idUser;
   final String storeName;
   final String storeAddress;
-  final String storeEpic;
+  final String? storeEpic; // Store image URL/path
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   StoreModel({
-    required this.idStore,
-    required this.idUser,
+    this.idStore,
+    this.idUser,
     required this.storeName,
     required this.storeAddress,
-    required this.storeEpic,
+    this.storeEpic,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  // Create StoreModel from JSON
   factory StoreModel.fromJson(Map<String, dynamic> json) {
     return StoreModel(
-      idStore: json['idStore'] ?? 0,
-      idUser: json['idUser'] ?? 0,
-      storeName: json['storeName'] ?? '',
-      storeAddress: json['storeAddress'] ?? '',
-      storeEpic: json['storeEpic'] ?? '',
+      idStore: json['id_store'] as int?,
+      idUser: json['id_user'] as int?,
+      storeName: json['store_name'] as String? ?? '',
+      storeAddress: json['store_address'] as String? ?? '',
+      storeEpic: json['store_epic'] as String?,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : null,
     );
   }
 
-  // Convert StoreModel to JSON
   Map<String, dynamic> toJson() {
     return {
-      'idStore': idStore,
-      'idUser': idUser,
-      'storeName': storeName,
-      'storeAddress': storeAddress,
-      'storeEpic': storeEpic,
+      if (idStore != null) 'id_store': idStore,
+      if (idUser != null) 'id_user': idUser,
+      'store_name': storeName,
+      'store_address': storeAddress,
+      if (storeEpic != null) 'store_epic': storeEpic,
     };
   }
 
-  // Create a copy with modified fields
   StoreModel copyWith({
     int? idStore,
     int? idUser,
     String? storeName,
     String? storeAddress,
     String? storeEpic,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return StoreModel(
       idStore: idStore ?? this.idStore,
@@ -51,11 +60,8 @@ class StoreModel {
       storeName: storeName ?? this.storeName,
       storeAddress: storeAddress ?? this.storeAddress,
       storeEpic: storeEpic ?? this.storeEpic,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
-  }
-
-  @override
-  String toString() {
-    return 'StoreModel(idStore: $idStore, storeName: $storeName, idUser: $idUser)';
   }
 }

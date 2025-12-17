@@ -1,63 +1,65 @@
 // lib/data/models/item_model.dart
 
 class ItemModel {
-  final int idItem;
-  final int idStore;
+  final int? idItem;
+  final int? idStore;
   final String itemName;
   final int itemPrice;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   ItemModel({
-    required this.idItem,
-    required this.idStore,
+    this.idItem,
+    this.idStore,
     required this.itemName,
     required this.itemPrice,
+    this.createdAt,
+    this.updatedAt,
   });
 
-  // Create ItemModel from JSON
   factory ItemModel.fromJson(Map<String, dynamic> json) {
     return ItemModel(
-      idItem: json['idItem'] ?? 0,
-      idStore: json['idStore'] ?? 0,
-      itemName: json['itemName'] ?? '',
-      itemPrice: json['itemPrice'] ?? 0,
+      idItem: json['id_item'] as int?,
+      idStore: json['id_store'] as int?,
+      itemName: json['item_name'] as String? ?? '',
+      itemPrice: json['item_price'] as int? ?? 0,
+      createdAt: json['created_at'] != null
+          ? DateTime.parse(json['created_at'] as String)
+          : null,
+      updatedAt: json['updated_at'] != null
+          ? DateTime.parse(json['updated_at'] as String)
+          : null,
     );
   }
 
-  // Convert ItemModel to JSON
   Map<String, dynamic> toJson() {
     return {
-      'idItem': idItem,
-      'idStore': idStore,
-      'itemName': itemName,
-      'itemPrice': itemPrice,
+      if (idItem != null) 'id_item': idItem,
+      if (idStore != null) 'id_store': idStore,
+      'item_name': itemName,
+      'item_price': itemPrice,
     };
   }
 
-  // Create a copy with modified fields
   ItemModel copyWith({
     int? idItem,
     int? idStore,
     String? itemName,
     int? itemPrice,
+    DateTime? createdAt,
+    DateTime? updatedAt,
   }) {
     return ItemModel(
       idItem: idItem ?? this.idItem,
       idStore: idStore ?? this.idStore,
       itemName: itemName ?? this.itemName,
       itemPrice: itemPrice ?? this.itemPrice,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
-  // Format price as currency (IDR)
   String get formattedPrice {
-    return 'Rp${itemPrice.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.',
-    )}';
-  }
-
-  @override
-  String toString() {
-    return 'ItemModel(idItem: $idItem, itemName: $itemName, itemPrice: $itemPrice)';
+    return 'Rp. ${itemPrice.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
   }
 }
