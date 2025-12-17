@@ -4,7 +4,7 @@ import 'package:restokin/data/models/invoice_model.dart';
 class InvoiceDetailPage extends StatelessWidget {
   final InvoiceModel invoice;
 
-  InvoiceDetailPage({required this.invoice});
+  const InvoiceDetailPage({super.key, required this.invoice});
 
   @override
   Widget build(BuildContext context) {
@@ -20,18 +20,18 @@ class InvoiceDetailPage extends StatelessWidget {
           children: [
             // Invoice Number & Store Name
             Text('Invoice Number: #${invoice.invoiceNumber}', 
-                style: Theme.of(context).textTheme.headline6),
-            SizedBox(height: 8),
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 8),
             Text('Store: ${invoice.storeName}', 
-                style: Theme.of(context).textTheme.subtitle1),
-            SizedBox(height: 8),
+                style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 8),
             Text('Date: ${invoice.date}', 
-                style: Theme.of(context).textTheme.subtitle2),
-            SizedBox(height: 16),
+                style: Theme.of(context).textTheme.bodyMedium),
+            const SizedBox(height: 16),
 
             // Product List
-            Text('Items:', style: Theme.of(context).textTheme.subtitle1),
-            Divider(),
+            Text('Items:', style: Theme.of(context).textTheme.titleMedium),
+            const Divider(),
             Column(
               children: invoice.items.map((item) {
                 return ListTile(
@@ -42,13 +42,13 @@ class InvoiceDetailPage extends StatelessWidget {
               }).toList(),
             ),
 
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
             // Total Amount
-            Divider(),
+            const Divider(),
             Text('Total: Rp${invoice.totalAmount}', 
-                style: Theme.of(context).textTheme.headline6),
-            SizedBox(height: 16),
+                style: Theme.of(context).textTheme.titleLarge),
+            const SizedBox(height: 16),
 
             // Payment Status
             Text('Payment Status: ${invoice.paymentStatus}', 
@@ -57,7 +57,7 @@ class InvoiceDetailPage extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                   color: _getPaymentStatusColor(invoice.paymentStatus),
                 )),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
 
             // Payment Button if invoice is "Not Paid"
             if (invoice.paymentStatus == 'Not Paid') 
@@ -71,7 +71,7 @@ class InvoiceDetailPage extends StatelessWidget {
                   invoice.paymentStatus = 'Paid';
                   // Optionally, update this in the service/database
                 },
-                child: Text('Pay Invoice'),
+                child: const Text('Pay Invoice'),
               ),
           ],
         ),

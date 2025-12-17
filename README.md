@@ -161,32 +161,95 @@ File APK akan tersimpan di: `build/app/outputs/flutter-apk/`
 
 ```
 lib/
-├── main.dart                    # Entry point aplikasi
-├── app.dart                     # Root widget & routing setup
+├── main.dart                        # Entry point aplikasi
+├── app.dart                         # Root widget & routing setup
 ├── core/
 │   ├── config/
-│   │   └── supabase_config.dart # Konfigurasi Supabase
+│   │   └── supabase_config.dart     # Konfigurasi Supabase
 │   ├── routing/
-│   │   └── app_router.dart      # Routing & navigation
+│   │   └── app_router.dart          # Routing & navigation
 │   ├── theme/
-│   │   └── app_theme.dart       # Global theme (Material 3)
-│   └── widgets/
-│       ├── primary_button.dart  # Reusable button
-│       └── text_field.dart      # Reusable text field
+│   │   ├── app_theme.dart           # Global theme (Material 3)
+│   │   └── app_colors.dart          # Color constants & gradients
+│   ├── widgets/
+│   │   ├── gradient_scaffold.dart   # Reusable gradient background
+│   │   ├── primary_button.dart      # Reusable button
+│   │   ├── text_field.dart          # Reusable text field
+│   │   ├── loading_overlay.dart     # Loading indicator
+│   │   └── card_tile.dart           # Card component
+│   ├── constants/
+│   │   ├── app_strings.dart         # String constants
+│   │   └── app_sizes.dart           # Size constants
+│   └── utils/
+│       └── validators.dart          # Input validators
 ├── data/
+│   ├── models/
+│   │   ├── user_model.dart          # User data model
+│   │   ├── store_model.dart         # Store data model
+│   │   ├── item_model.dart          # Item data model
+│   │   ├── cart_model.dart          # Cart data model
+│   │   ├── invoice_model.dart       # Invoice data model
+│   │   ├── payment_type_model.dart  # Payment type model
+│   │   └── user_payment_type_model.dart # User payment method
 │   ├── repositories/
-│   │   └── auth_repository.dart # Repository pattern untuk auth
+│   │   ├── auth_repository.dart     # Auth repository
+│   │   ├── profile_repository.dart  # Profile repository
+│   │   ├── store_repository.dart    # Store repository
+│   │   ├── payment_repository.dart  # Payment repository
+│   │   ├── cart_repository.dart     # Cart repository
+│   │   └── invoice_repository.dart  # Invoice repository
 │   └── services/
-│       ├── supabase_client.dart # Supabase client singleton
-│       └── auth_service.dart    # Authentication service
+│       ├── supabase_client.dart     # Supabase client singleton
+│       ├── auth_service.dart        # Authentication service
+│       ├── store_service.dart       # Store CRUD service
+│       ├── payment_service.dart     # Payment service
+│       ├── invoice_service.dart     # Invoice service
+│       ├── cart_service.dart        # Cart service
+│       └── user_service.dart        # User service
 ├── features/
 │   ├── auth/
-│   │   ├── login_page.dart      # Login screen
-│   │   └── register_page.dart   # Register screen
-│   └── profile/
-│       └── create_profile_page.dart
+│   │   ├── login_page.dart          # Login screen
+│   │   └── register_page.dart       # Register screen
+│   ├── profile/
+│   │   ├── create_profile_page.dart # Profile creation
+│   │   ├── edit_profile_page.dart   # Edit profile
+│   │   ├── profile_menu_page.dart   # Profile menu
+│   │   ├── payment_methods_page.dart # Payment methods list
+│   │   ├── add_payment_method_page.dart # Add payment method
+│   │   └── change_password_page.dart # Change password
+│   ├── payment/
+│   │   ├── select_payment_page.dart # Select payment method
+│   │   ├── input_payment_page.dart  # Input payment details
+│   │   └── payment_success_page.dart # Payment method success
+│   ├── role/
+│   │   └── role_selection_page.dart # Role selection (Owner/Restocker)
+│   ├── store_owner/
+│   │   ├── my_store_page.dart       # My stores list
+│   │   ├── create_store_page.dart   # Create new store
+│   │   ├── edit_store_page.dart     # Edit store
+│   │   └── add_store_items_page.dart # Add store items
+│   ├── browse_store/
+│   │   ├── stores_list_page.dart    # Browse stores (restocker)
+│   │   └── store_detail_restock_page.dart # Store details
+│   ├── restock/
+│   │   ├── restock_invoice_preview_page.dart # Invoice preview
+│   │   └── restock_proof_page.dart  # Upload restock proof
+│   ├── invoices/
+│   │   ├── invoices_tab_page.dart   # Invoice tabs
+│   │   ├── invoice_detail_page.dart # Invoice details
+│   │   └── payment_success_page.dart # Payment success
+│   ├── home/
+│   │   └── home_page.dart           # Home screen
+│   └── settings/
+│       └── logout_dialog.dart       # Logout confirmation
 └── state/
-    └── auth_provider.dart       # Auth state management
+    ├── auth_provider.dart           # Auth state management
+    ├── profile_provider.dart        # Profile state
+    ├── store_provider.dart          # Store state
+    ├── payment_provider.dart        # Payment state
+    ├── cart_provider.dart           # Cart state
+    ├── invoiceprovider.dart         # Invoice state
+    └── app_provider.dart            # App global state
 ```
 
 ---
@@ -196,27 +259,65 @@ lib/
 ### Muhammad Iqbal Baiduri Yamani (5026221103)
 **Tanggung Jawab:**
 - ✅ Login & Register UI/UX (Figma implementation)
-- ✅ Supabase Integration (authentication)
+- ✅ Supabase Integration (Auth + Database + Storage)
 - ✅ App bootstrapping & routing
 - ✅ Global theme (Material 3 dengan gradients)
 - ✅ Google Sign In OAuth
+- ✅ Profile management (create, edit, image upload)
+- ✅ Payment method system (9 payment types dengan logos)
+- ✅ Store management (create, edit, list stores)
+- ✅ Database schema design & RLS policies
+- ✅ Navigation stack management
 - ✅ Project documentation
 
 **File yang Dikerjakan:**
 - `lib/main.dart`
 - `lib/app.dart`
 - `lib/core/theme/app_theme.dart`
+- `lib/core/theme/app_colors.dart`
 - `lib/core/routing/app_router.dart`
+- `lib/core/widgets/gradient_scaffold.dart`
 - `lib/core/widgets/primary_button.dart`
 - `lib/core/widgets/text_field.dart`
+- `lib/core/widgets/loading_overlay.dart`
+- `lib/core/widgets/card_tile.dart`
+- `lib/core/constants/app_strings.dart`
+- `lib/core/constants/app_sizes.dart`
+- `lib/core/utils/validators.dart`
 - `lib/data/services/supabase_client.dart`
 - `lib/data/services/auth_service.dart`
+- `lib/data/services/store_service.dart`
+- `lib/data/services/payment_service.dart`
 - `lib/data/repositories/auth_repository.dart`
+- `lib/data/repositories/profile_repository.dart`
+- `lib/data/repositories/store_repository.dart`
+- `lib/data/repositories/payment_repository.dart`
+- `lib/data/models/user_model.dart`
+- `lib/data/models/store_model.dart`
+- `lib/data/models/payment_type_model.dart`
+- `lib/data/models/user_payment_type_model.dart`
 - `lib/features/auth/login_page.dart`
 - `lib/features/auth/register_page.dart`
 - `lib/features/profile/create_profile_page.dart`
+- `lib/features/profile/edit_profile_page.dart`
+- `lib/features/profile/profile_menu_page.dart`
+- `lib/features/profile/payment_methods_page.dart`
+- `lib/features/profile/add_payment_method_page.dart`
+- `lib/features/profile/change_password_page.dart`
+- `lib/features/payment/select_payment_page.dart`
+- `lib/features/payment/input_payment_page.dart`
+- `lib/features/payment/payment_success_page.dart`
+- `lib/features/role/role_selection_page.dart`
+- `lib/features/store_owner/my_store_page.dart`
+- `lib/features/store_owner/create_store_page.dart`
+- `lib/features/store_owner/edit_store_page.dart`
 - `lib/state/auth_provider.dart`
+- `lib/state/profile_provider.dart`
+- `lib/state/store_provider.dart`
+- `lib/state/payment_provider.dart`
+- `assets/images/*` (Payment logos)
 - `README.md`
+- SQL migrations (executed in Supabase)
 - `.env.example`
 
 ---
@@ -224,26 +325,72 @@ lib/
 ## 🎨 Fitur yang Sudah Diimplementasi
 
 ### Authentication
-- ✅ Login dengan Email & Password
-- ✅ Register dengan Email & Password
+- ✅ Login dengan Email & Password (Supabase Auth)
+- ✅ Register dengan Email & Password (Supabase Auth)
 - ✅ Google Sign In (OAuth 2.0)
 - ✅ Deep linking untuk OAuth callback
-- ✅ Create Profile setelah register
+- ✅ Auto-sync auth.users → public.users (trigger)
+- ✅ Email-based user lookup
+- ✅ Session management
+
+### Profile & Payment
+- ✅ Create Profile (nickname, description, profile image)
+- ✅ Edit Profile
+- ✅ Profile Menu
+- ✅ Payment Method Management
+- ✅ 9 Payment Types (Dana, Gopay, OVO, ShopeePay, Bank Mandiri, BCA, BNI, BRI, BSI)
+- ✅ Payment method with logos
+- ✅ Payment account details storage (JSON)
+
+### Store Management (Store Owner)
+- ✅ Create Store (name, address, store image)
+- ✅ My Stores List
+- ✅ Edit Store
+- ✅ Add Store Items
+- ✅ User-specific store loading (RLS)
+
+### Browse & Restock (Restocker)
+- ✅ Browse Stores List
+- ✅ Store Details
+- ✅ Restock Invoice Preview
+- ✅ Upload Restock Proof
+
+### Invoice Management
+- ✅ Invoice Tabs (Incoming/Outgoing)
+- ✅ Invoice Details
+- ✅ Payment Success Screen
+- ✅ Mark as Paid
 
 ### UI/UX
 - ✅ Material 3 Design System
-- ✅ Gradient backgrounds (Navy blue theme)
+- ✅ Gradient backgrounds (Navy blue: #02173A → #032352)
+- ✅ GradientScaffold widget for consistency
 - ✅ Gradient buttons dengan hover effects
 - ✅ Custom text fields dengan external labels
 - ✅ Responsive layouts
 - ✅ App icon & splash screen
+- ✅ Loading overlays
+- ✅ Card tile components
 
 ### Infrastructure
-- ✅ Supabase integration
-- ✅ State management (ChangeNotifier)
+- ✅ Supabase integration (Auth + Database + Storage)
+- ✅ State management (Provider pattern)
 - ✅ Repository pattern
-- ✅ Named routing
+- ✅ Named routing dengan navigasi stack preservation
 - ✅ Error handling
+- ✅ Image upload (readAsBytes + uploadBinary)
+- ✅ RLS policies (users, stores, user_payment_types)
+- ✅ Storage buckets (profile-images, stores)
+
+### Database Schema
+- ✅ users (auth_user_id UUID, nickname, description, role, profile_image_url)
+- ✅ stores (id_user FK, name, address, store_image_url)
+- ✅ items (store_id FK, name, stock, price)
+- ✅ payment_types (name, category: E-Wallet/Bank)
+- ✅ user_payment_types (user_id FK, payment_type_id FK, payment_details JSON)
+- ✅ carts (user_id FK, store_id FK)
+- ✅ cart_items (cart_id FK, item_id FK, quantity)
+- ✅ invoices (store_id FK, user_id FK, total_price, status)
 
 ---
 
