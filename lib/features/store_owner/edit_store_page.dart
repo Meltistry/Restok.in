@@ -85,6 +85,8 @@ class _EditStorePageState extends State<EditStorePage> {
   }
 
   Future<void> _deleteStore() async {
+    final storeProvider = context.read<StoreProvider>();
+    
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -106,17 +108,19 @@ class _EditStorePageState extends State<EditStorePage> {
 
     if (confirm != true) return;
 
-    final storeProvider = context.read<StoreProvider>();
     final success = await storeProvider.deleteStore(widget.store.idStore!);
 
     if (!mounted) return;
 
     if (success) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Store deleted successfully!')),
       );
+      if (!mounted) return;
       Navigator.pop(context, true);
     } else {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(storeProvider.error ?? 'Failed to delete store'),

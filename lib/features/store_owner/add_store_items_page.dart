@@ -286,7 +286,7 @@ class _AddStoreItemsPageState extends State<AddStoreItemsPage> {
               value: false,
               onChanged: (value) {},
               checkColor: Colors.white,
-              fillColor: MaterialStateProperty.all(const Color(0xFF1E7B7B)),
+              fillColor: WidgetStateProperty.all(const Color(0xFF1E7B7B)),
             ),
           ),
         ],
@@ -478,6 +478,8 @@ class _EditItemDialogState extends State<_EditItemDialog> {
   }
 
   Future<void> _deleteItem() async {
+    final storeProvider = context.read<StoreProvider>();
+    
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -499,15 +501,24 @@ class _EditItemDialogState extends State<_EditItemDialog> {
 
     if (confirm != true) return;
 
-    final storeProvider = context.read<StoreProvider>();
     final success = await storeProvider.deleteItem(widget.item.idItem);
 
     if (!mounted) return;
 
     if (success) {
+      if (!mounted) return;
       Navigator.pop(context);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Item deleted successfully!')),
+      );
+    } else {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(storeProvider.error ?? 'Failed to delete item'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }

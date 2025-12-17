@@ -9,6 +9,7 @@ import "package:restokin/state/invoice_provider.dart";
 class InvoicesTabPage extends StatelessWidget {
   const InvoicesTabPage({super.key});
 
+<<<<<<< HEAD
   @override
   Widget build(BuildContext context) {
     final auth = context.read<AuthProvider?>();
@@ -22,6 +23,25 @@ class InvoicesTabPage extends StatelessWidget {
 
 class _InvoicesTabScaffold extends StatelessWidget {
   const _InvoicesTabScaffold();
+=======
+class InvoicesTabPage extends StatefulWidget {
+  const InvoicesTabPage({super.key});
+
+  @override
+  InvoicesTabPageState createState() => InvoicesTabPageState();
+}
+
+class InvoicesTabPageState extends State<InvoicesTabPage> {
+  late List<InvoiceModel> incomingInvoices;
+  late List<InvoiceModel> outgoingInvoices;
+
+  @override
+  void initState() {
+    super.initState();
+    incomingInvoices = InvoiceService.getIncomingInvoices();
+    outgoingInvoices = InvoiceService.getOutgoingInvoices();
+  }
+>>>>>>> 57ed91b57323f8a666ab8bb54cc02f9b00fcaf79
 
   @override
   Widget build(BuildContext context) {
