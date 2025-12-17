@@ -270,56 +270,6 @@ lib/
 - ✅ Navigation stack management
 - ✅ Project documentation
 
-**File yang Dikerjakan:**
-- `lib/main.dart`
-- `lib/app.dart`
-- `lib/core/theme/app_theme.dart`
-- `lib/core/theme/app_colors.dart`
-- `lib/core/routing/app_router.dart`
-- `lib/core/widgets/gradient_scaffold.dart`
-- `lib/core/widgets/primary_button.dart`
-- `lib/core/widgets/text_field.dart`
-- `lib/core/widgets/loading_overlay.dart`
-- `lib/core/widgets/card_tile.dart`
-- `lib/core/constants/app_strings.dart`
-- `lib/core/constants/app_sizes.dart`
-- `lib/core/utils/validators.dart`
-- `lib/data/services/supabase_client.dart`
-- `lib/data/services/auth_service.dart`
-- `lib/data/services/store_service.dart`
-- `lib/data/services/payment_service.dart`
-- `lib/data/repositories/auth_repository.dart`
-- `lib/data/repositories/profile_repository.dart`
-- `lib/data/repositories/store_repository.dart`
-- `lib/data/repositories/payment_repository.dart`
-- `lib/data/models/user_model.dart`
-- `lib/data/models/store_model.dart`
-- `lib/data/models/payment_type_model.dart`
-- `lib/data/models/user_payment_type_model.dart`
-- `lib/features/auth/login_page.dart`
-- `lib/features/auth/register_page.dart`
-- `lib/features/profile/create_profile_page.dart`
-- `lib/features/profile/edit_profile_page.dart`
-- `lib/features/profile/profile_menu_page.dart`
-- `lib/features/profile/payment_methods_page.dart`
-- `lib/features/profile/add_payment_method_page.dart`
-- `lib/features/profile/change_password_page.dart`
-- `lib/features/payment/select_payment_page.dart`
-- `lib/features/payment/input_payment_page.dart`
-- `lib/features/payment/payment_success_page.dart`
-- `lib/features/role/role_selection_page.dart`
-- `lib/features/store_owner/my_store_page.dart`
-- `lib/features/store_owner/create_store_page.dart`
-- `lib/features/store_owner/edit_store_page.dart`
-- `lib/state/auth_provider.dart`
-- `lib/state/profile_provider.dart`
-- `lib/state/store_provider.dart`
-- `lib/state/payment_provider.dart`
-- `assets/images/*` (Payment logos)
-- `README.md`
-- SQL migrations (executed in Supabase)
-- `.env.example`
-
 ---
 
 ## 🎨 Fitur yang Sudah Diimplementasi
@@ -402,12 +352,6 @@ lib/
 - `android/app/google-services.json` (jika pakai Firebase)
 
 File-file ini sudah ditambahkan ke `.gitignore`.
-
----
-
-## 📱 Screenshots
-
-<!-- Tambahkan screenshot aplikasi di sini -->
 
 ---
 
