@@ -14,48 +14,8 @@ class InvoiceDetailPage extends StatefulWidget {
     this.roleHint,
   });
 
-<<<<<<< HEAD
-  final String invoiceId;
-  final String? mode; // incoming / outgoing
-  final String? roleHint; // storeOwner / restocker
 
-  @override
-  State<InvoiceDetailPage> createState() => _InvoiceDetailPageState();
-}
 
-class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
-  bool _initialized = false;
-  late final InvoiceProvider _provider = InvoiceProvider();
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (!_initialized) {
-      _initialized = true;
-      _load();
-    }
-  }
-
-  Future<void> _load() async {
-    final auth = context.read<AuthProvider?>();
-    final userId = auth?.user?.id;
-    await _provider.loadInvoices(currentUserId: userId);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider<InvoiceProvider>.value(
-      value: _provider,
-      child: Consumer<InvoiceProvider>(
-        builder: (context, provider, _) {
-          final invoice = provider.getInvoiceById(widget.invoiceId);
-          final isLoading = provider.isLoading && invoice == null;
-          final error = provider.errorMessage;
-
-          return Scaffold(
-            appBar: AppBar(
-              title: Text("Invoice #${widget.invoiceId}"),
-=======
   const InvoiceDetailPage({super.key, required this.invoice});
 
   @override
@@ -92,7 +52,7 @@ class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
                   trailing: Text('Rp${item.totalPrice}'),
                 );
               }).toList(),
->>>>>>> 57ed91b57323f8a666ab8bb54cc02f9b00fcaf79
+
             ),
             body: RefreshIndicator(
               color: AppColors.primary,
@@ -116,50 +76,8 @@ class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
   }
 }
 
-<<<<<<< HEAD
-class _InvoiceDetailBody extends StatelessWidget {
-  const _InvoiceDetailBody({
-    required this.invoice,
-    required this.mode,
-    required this.roleHint,
-  });
 
-  final InvoiceModel invoice;
-  final String? mode;
-  final String? roleHint;
 
-  bool get _isPaid => invoice.paymentStatus.toLowerCase().contains("paid");
-
-  @override
-  Widget build(BuildContext context) {
-    final canPay = !_isPaid && (roleHint == "restocker" || mode == "outgoing" || roleHint == null);
-    final statusColor = _isPaid ? AppColors.success : AppColors.danger;
-    final proofUrl = _resolveProofUrl(invoice);
-
-    return Container(
-      color: AppColors.background,
-      child: SafeArea(
-        bottom: true,
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
-                children: [
-                  _Header(invoice: invoice),
-                  const SizedBox(height: 16),
-                  _ItemsCard(invoice: invoice),
-                  const SizedBox(height: 16),
-                  _ProofSection(
-                    proofUrl: proofUrl,
-                    isWaiting: !_isPaid,
-                    roleHint: roleHint,
-                  ),
-                  const SizedBox(height: 16),
-                  if (canPay) _PaymentMethodCard(total: invoice.totalAmount),
-                  const SizedBox(height: 8),
-                ],
-=======
             const SizedBox(height: 16),
 
             // Total Amount
@@ -190,7 +108,7 @@ class _InvoiceDetailBody extends StatelessWidget {
                   // Optionally, update this in the service/database
                 },
                 child: const Text('Pay Invoice'),
->>>>>>> 57ed91b57323f8a666ab8bb54cc02f9b00fcaf79
+
               ),
             ),
             Padding(
