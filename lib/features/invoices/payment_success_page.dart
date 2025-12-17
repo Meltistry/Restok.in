@@ -9,7 +9,8 @@ class PaymentSuccessPage extends StatelessWidget {
   final String receivingWalletName;
   final String receivingWalletNumber;
 
-  PaymentSuccessPage({
+  const PaymentSuccessPage({
+    super.key,
     required this.invoiceNumber,
     required this.paymentDate,
     required this.totalAmount,
@@ -54,9 +55,9 @@ class PaymentSuccessPage extends StatelessWidget {
 
             // Payment Details
             Container(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               decoration: BoxDecoration(
-                color: Colors.blueAccent.withOpacity(0.1),
+                color: Colors.blueAccent.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Column(
@@ -120,12 +121,12 @@ class PaymentSuccessPage extends StatelessWidget {
                   // Navigate to another screen (optional)
                   Navigator.pop(context);
                 },
-                child: Text('Done'),
                 style: ElevatedButton.styleFrom(
-                  primary: Colors.green, // Button color
-                  padding: EdgeInsets.symmetric(horizontal: 50, vertical: 12),
-                  textStyle: TextStyle(fontSize: 18),
+                  backgroundColor: Colors.green, // Button color
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 12),
+                  textStyle: const TextStyle(fontSize: 18),
                 ),
+                child: const Text('Done'),
               ),
             ),
           ],
@@ -136,35 +137,35 @@ class PaymentSuccessPage extends StatelessWidget {
 
   Widget _buildWalletInfo({required String name, required String number}) {
     return Container(
-      padding: EdgeInsets.all(12.0),
+      padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 5)],
+        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 5)],
       ),
       child: Row(
         children: [
-          CircleAvatar(
+          const CircleAvatar(
             backgroundColor: Colors.blueAccent,
             child: Icon(Icons.account_circle, color: Colors.white),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   name,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.blueAccent,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   'Phone: $number',
-                  style: TextStyle(fontSize: 14, color: Colors.grey),
+                  style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
               ],
             ),

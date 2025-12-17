@@ -1,8 +1,12 @@
 // lib/features/profile/create_profile_page.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:restokin/core/widgets/primary_button.dart';
 import 'package:restokin/core/widgets/text_field.dart';
+import '../../state/profile_provider.dart';
 
 class CreateProfilePage extends StatefulWidget {
   const CreateProfilePage({super.key});
@@ -16,7 +20,6 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
   final _descriptionC = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
-  bool _isSubmitting = false;
   File? _profileImage;
   String? _email;
   bool _isGoogleSignUp = false;
@@ -47,27 +50,85 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
   }
 
   Future<void> _pickImage() async {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Image picker akan diimplementasi. Install image_picker package.'),
-      ),
-    );
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        setState(() {
+          _profileImage = File(image.path);
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error picking image: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _handleNext() async {
     if (!_formKey.currentState!.validate()) return;
 
-    setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(seconds: 1));
+    // Get current authenticated user
+    final authUser = Supabase.instance.client.auth.currentUser;
+    if (authUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Not authenticated'), backgroundColor: Colors.red),
+      );
+      return;
+    }
 
-    setState(() => _isSubmitting = false);
+    // Get id_user from public.users table using email (simpler than UUID)
+    final userResponse = await Supabase.instance.client
+        .from('users')
+        .select('id_user')
+        .eq('email', authUser.email!)
+        .maybeSingle();
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile created! (dummy)')),
+
+    if (userResponse == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User not found: ${authUser.email}'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    final userId = userResponse['id_user'] as int;
+
+    final profileProvider = context.read<ProfileProvider>();
+    
+    final success = await profileProvider.createProfile(
+      userId: userId,
+      nickname: _nicknameC.text.trim(),
+      description: _descriptionC.text.trim().isEmpty 
+          ? null 
+          : _descriptionC.text.trim(),
+      profileImagePath: _profileImage?.path,
     );
-    // Navigator.pushReplacementNamed(context, '/role-selection');
+
+    if (!mounted) return;
+
+    if (success) {
+      // Navigate to payment method selection
+      Navigator.pushNamed(context, '/select-payment');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(profileProvider.error ?? 'Failed to create profile'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   @override
@@ -76,6 +137,15 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
     final colorScheme = theme.colorScheme;
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      extendBodyBehindAppBar: true,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -202,10 +272,14 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                       },
                     ),
                     const SizedBox(height: 32),
-                    PrimaryButton(
-                      text: 'Next',
-                      isLoading: _isSubmitting,
-                      onPressed: _isSubmitting ? null : _handleNext,
+                    Consumer<ProfileProvider>(
+                      builder: (context, profileProvider, child) {
+                        return PrimaryButton(
+                          text: 'Next',
+                          isLoading: profileProvider.isLoading,
+                          onPressed: profileProvider.isLoading ? null : _handleNext,
+                        );
+                      },
                     ),
                   ],
                 ),

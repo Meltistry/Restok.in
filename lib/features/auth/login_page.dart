@@ -30,15 +30,44 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(seconds: 1));
+    
+    try {
+      // Actual login with Supabase
+      final authService = AuthService();
+      final response = await authService.signInWithEmail(
+        email: _emailC.text.trim(),
+        password: _passwordC.text,
+      );
 
-    setState(() => _isSubmitting = false);
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
 
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Login berhasil (dummy). Implement auth!')),
-    );
-    //Navigator.pushReplacementNamed(context, '/home');
+      if (response.user != null && response.session != null) {
+        // Login successful, navigate to create profile
+        Navigator.pushNamed(context, '/create-profile');
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login berhasil!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login failed. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _goToRegister() {
@@ -57,14 +86,19 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _isSubmitting = false);
 
       if (success) {
-        // Navigate to home after successful login
-        // Navigator.pushReplacementNamed(context, '/home');
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google Sign In berhasil! (Redirect ke home page)'),
-            backgroundColor: Colors.green,
-          ),
-        );
+        // Get user info and navigate to create profile
+        final user = authService.currentUser;
+        if (user != null && mounted) {
+          Navigator.pushNamed(
+            context,
+            '/create-profile',
+            arguments: {
+              'email': user.email ?? '',
+              'username': user.userMetadata?['name'] ?? user.email?.split('@')[0] ?? '',
+              'isGoogleSignIn': true,
+            },
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -163,7 +197,7 @@ class _LoginPageState extends State<LoginPage> {
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscure ? Icons.visibility_off : Icons.visibility,
-                          color: colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: Colors.white,
                         ),
                         onPressed: () {
                           setState(() => _obscure = !_obscure);

@@ -4,11 +4,13 @@ import "package:restokin/data/services/invoice_service.dart";
 import "package:restokin/features/invoices/invoice_detail_page.dart";
 
 class InvoicesTabPage extends StatefulWidget {
+  const InvoicesTabPage({super.key});
+
   @override
-  _InvoicesTabPageState createState() => _InvoicesTabPageState();
+  InvoicesTabPageState createState() => InvoicesTabPageState();
 }
 
-class _InvoicesTabPageState extends State<InvoicesTabPage> {
+class InvoicesTabPageState extends State<InvoicesTabPage> {
   late List<InvoiceModel> incomingInvoices;
   late List<InvoiceModel> outgoingInvoices;
 

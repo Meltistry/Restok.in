@@ -2,11 +2,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:restokin/features/store_owner/add_store_items_page.dart';
 import '../../state/store_provider.dart';
-import '../../state/auth_provider.dart';
 import 'create_store_page.dart';
-import 'edit_store_page.dart';
 
 class MyStorePage extends StatefulWidget {
   const MyStorePage({super.key});
@@ -59,15 +58,44 @@ class _MyStorePageState extends State<MyStorePage> {
 
   // lib/features/store_owner/my_store_page.dart (Fungsi _loadStores)
 
-  void _loadStores() {
-    // START: HARDCODED USER ID UNTUK TESTING
+  void _loadStores() async {
+    // Get current authenticated user
+    final authUser = Supabase.instance.client.auth.currentUser;
+    if (authUser == null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Not authenticated'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+      return;
+    }
 
-    // 1. Definisikan User ID Hardcoded
-    // Karena StoreProvider  meminta 'int', saya gunakan 1.
-    const int userIdInt = 1;
+    // Get id_user from public.users table using email
+    final userResponse = await Supabase.instance.client
+        .from('users')
+        .select('id_user')
+        .eq('email', authUser.email!)
+        .maybeSingle();
 
-    // 2. Langsung panggil fungsi pemuatan data
-    context.read<StoreProvider>().loadUserStores(userIdInt);
+    if (!mounted) return;
+
+    if (userResponse == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('User not found'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    final userId = userResponse['id_user'] as int;
+    
+    // Load stores for this user
+    context.read<StoreProvider>().loadUserStores(userId);
   }
 
   @override
@@ -192,13 +220,13 @@ class _MyStorePageState extends State<MyStorePage> {
           Icon(
             Icons.store_outlined,
             size: 80,
-            color: Color(0xFFB8E6E6).withOpacity(0.3),
+            color: Color(0xFFB8E6E6).withValues(alpha: 0.3),
           ),
           const SizedBox(height: 16),
           Text(
             'No stores yet',
             style: TextStyle(
-              color: Color(0xFFB8E6E6).withOpacity(0.6),
+              color: Color(0xFFB8E6E6).withValues(alpha: 0.6),
               fontSize: 18,
             ),
           ),
@@ -206,7 +234,7 @@ class _MyStorePageState extends State<MyStorePage> {
           Text(
             'Tap "Add Store" to create your first store',
             style: TextStyle(
-              color: Color(0xFFB8E6E6).withOpacity(0.4),
+              color: Color(0xFFB8E6E6).withValues(alpha: 0.4),
               fontSize: 14,
             ),
           ),

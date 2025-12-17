@@ -1,9 +1,10 @@
 // lib/data/services/store_service.dart
 
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../models/store_model.dart';
 import '../models/item_model.dart';
-import 'dart:typed_data';
 
 class StoreService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -158,13 +159,8 @@ class StoreService {
   }
 
   Future<Uint8List> _readFileAsBytes(String filePath) async {
-    // Implement file reading based on your platform
-    // This is a placeholder/example for mobile (using dart:io)
-    /*
-        import 'dart:io';
-        final file = File(filePath);
-        return file.readAsBytes();
-        */
-    throw UnimplementedError('Implement file reading based on platform');
+    // Read file for mobile platform
+    final file = File(filePath);
+    return await file.readAsBytes();
   }
 }
