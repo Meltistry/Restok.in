@@ -1,3 +1,4 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -8,6 +9,7 @@ import 'state/auth_provider.dart';
 import 'state/store_provider.dart';
 import 'state/payment_provider.dart';
 import 'state/profile_provider.dart';
+import 'state/app_provider.dart'; // Your AppProvider
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,23 +35,12 @@ void main() async {
         ChangeNotifierProvider(create: (_) => StoreProvider()),
         ChangeNotifierProvider(create: (_) => PaymentProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => AppProvider()), // Add your AppProvider here
       ],
-      child: const RestokInApp(),
+      child: const RestokInApp(), // Use RestokInApp (from app.dart)
     ),
   );
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => AppProvider(),
-      child: const MaterialApp(
-        debugShowCheckedModeBanner: false,
-        home: HomePage(),
-      ),
-    );
-  }
-}
+// Remove MainApp class - it's duplicate and not needed
+// Use RestokInApp from app.dart instead
