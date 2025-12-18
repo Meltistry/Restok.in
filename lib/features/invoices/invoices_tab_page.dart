@@ -9,11 +9,6 @@ import "package:restokin/state/invoice_provider.dart";
 class InvoicesTabPage extends StatelessWidget {
   const InvoicesTabPage({super.key});
 
-
-
-class InvoicesTabPage extends StatefulWidget {
-  const InvoicesTabPage({super.key});
-
   @override
   InvoicesTabPageState createState() => InvoicesTabPageState();
 }

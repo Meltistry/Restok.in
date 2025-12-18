@@ -14,45 +14,55 @@ class InvoiceDetailPage extends StatefulWidget {
     this.roleHint,
   });
 
+  final String invoiceId;
+  final String? mode; // incoming / outgoing
+  final String? roleHint; // storeOwner / restocker
 
+  @override
+  State<InvoiceDetailPage> createState() => _InvoiceDetailPageState();
+}
 
-  const InvoiceDetailPage({super.key, required this.invoice});
+class _InvoiceDetailPageState extends State<InvoiceDetailPage> {
+  late final InvoiceProvider _provider = InvoiceProvider();
+  bool _initialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _initialized = true;
+      _load();
+    }
+  }
+
+  Future<void> _load() async {
+    final auth = context.read<AuthProvider?>();
+    final userId = auth?.user?.id;
+    if (userId == null) return;
+    await _provider.loadInvoices(userId: userId, forceRefresh: true);
+    await _provider.loadInvoiceDetail(widget.invoiceId);
+  }
+
+  @override
+  void dispose() {
+    _provider.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Invoice - ${invoice.invoiceNumber}'),
-        backgroundColor: Colors.blueAccent,
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Invoice Number & Store Name
-            Text('Invoice Number: #${invoice.invoiceNumber}', 
-                style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 8),
-            Text('Store: ${invoice.storeName}', 
-                style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 8),
-            Text('Date: ${invoice.date}', 
-                style: Theme.of(context).textTheme.bodyMedium),
-            const SizedBox(height: 16),
+    return ChangeNotifierProvider<InvoiceProvider>.value(
+      value: _provider,
+      child: Consumer<InvoiceProvider>(
+        builder: (context, provider, _) {
+          final invoice = provider.getDetail(widget.invoiceId);
+          final isLoading =
+              (provider.isLoadingList || provider.isLoadingDetail) && invoice == null;
+          final error = provider.detailError ?? provider.listError;
 
-            // Product List
-            Text('Items:', style: Theme.of(context).textTheme.titleMedium),
-            const Divider(),
-            Column(
-              children: invoice.items.map((item) {
-                return ListTile(
-                  title: Text(item.name),
-                  subtitle: Text('Quantity: ${item.quantity}, Price: ${item.price}'),
-                  trailing: Text('Rp${item.totalPrice}'),
-                );
-              }).toList(),
-
+          return Scaffold(
+            appBar: AppBar(
+              title: Text("Invoice #${widget.invoiceId}"),
             ),
             body: RefreshIndicator(
               color: AppColors.primary,
@@ -76,39 +86,48 @@ class InvoiceDetailPage extends StatefulWidget {
   }
 }
 
+class _InvoiceDetailBody extends StatelessWidget {
+  const _InvoiceDetailBody({
+    required this.invoice,
+    required this.mode,
+    required this.roleHint,
+  });
 
+  final InvoiceModel invoice;
+  final String? mode;
+  final String? roleHint;
 
-            const SizedBox(height: 16),
+  bool get _isPaid => invoice.paymentStatus.toLowerCase().contains("paid");
 
-            // Total Amount
-            const Divider(),
-            Text('Total: Rp${invoice.totalAmount}', 
-                style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 16),
+  @override
+  Widget build(BuildContext context) {
+    final canPay = !_isPaid && (roleHint == "restocker" || mode == "outgoing" || roleHint == null);
+    final statusColor = _isPaid ? AppColors.success : AppColors.danger;
+    final proofUrl = _resolveProofUrl(invoice);
 
-            // Payment Status
-            Text('Payment Status: ${invoice.paymentStatus}', 
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: _getPaymentStatusColor(invoice.paymentStatus),
-                )),
-            const SizedBox(height: 16),
-
-            // Payment Button if invoice is "Not Paid"
-            if (invoice.paymentStatus == 'Not Paid') 
-              ElevatedButton(
-                onPressed: () {
-                  // Simulate payment logic
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Processing payment for Invoice #${invoice.invoiceNumber}')),
-                  );
-                  // Update payment status (for example purposes)
-                  invoice.paymentStatus = 'Paid';
-                  // Optionally, update this in the service/database
-                },
-                child: const Text('Pay Invoice'),
-
+    return Container(
+      color: AppColors.background,
+      child: SafeArea(
+        bottom: true,
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView(
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+                children: [
+                  _Header(invoice: invoice),
+                  const SizedBox(height: 16),
+                  _ItemsCard(invoice: invoice),
+                  const SizedBox(height: 16),
+                  _ProofSection(
+                    proofUrl: proofUrl,
+                    isWaiting: !_isPaid,
+                    roleHint: roleHint,
+                  ),
+                  const SizedBox(height: 16),
+                  if (canPay) _PaymentMethodCard(total: invoice.totalAmount),
+                  const SizedBox(height: 8),
+                ],
               ),
             ),
             Padding(
@@ -374,6 +393,9 @@ class _PayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final auth = context.read<AuthProvider?>();
+    final payerId = auth?.user?.id ?? "";
+
     return Consumer<InvoiceProvider>(
       builder: (context, provider, _) {
         return SizedBox(
@@ -385,7 +407,13 @@ class _PayButton extends StatelessWidget {
               minimumSize: const Size.fromHeight(52),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            onPressed: provider.isPaying ? null : () => _handlePay(context, provider),
+            onPressed: provider.isPaying
+                ? null
+                : () => _handlePay(
+                      context: context,
+                      provider: provider,
+                      payerId: payerId,
+                    ),
             child: provider.isPaying
                 ? const SizedBox(
                     height: 20,
@@ -399,8 +427,20 @@ class _PayButton extends StatelessWidget {
     );
   }
 
-  Future<void> _handlePay(BuildContext context, InvoiceProvider provider) async {
-    final success = await provider.payInvoice(invoice);
+  Future<void> _handlePay({
+    required BuildContext context,
+    required InvoiceProvider provider,
+    required String payerId,
+  }) async {
+    // TODO: Map payeeId from invoice/store owner once available.
+    final payeeId = invoice.storeName;
+
+    final success = await provider.payInvoice(
+      invoiceId: invoice.invoiceNumber,
+      payerId: payerId,
+      payeeId: payeeId,
+      amount: invoice.totalAmount,
+    );
     if (!context.mounted) return;
     if (success) {
       Navigator.push(
@@ -417,28 +457,9 @@ class _PayButton extends StatelessWidget {
         ),
       );
     } else {
-      final msg = provider.errorMessage ?? "Payment failed. Please try again.";
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
-    }
-  }
-}
-
-class _StatusFooter extends StatelessWidget {
-  const _StatusFooter({
-    required this.label,
-    required this.color,
-    required this.isPaid,
-  });
-
-  final String label;
-  final Color color;
-  final bool isPaid;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
+      final msg = provider.payError ?? "Payment failed. Please try again.";
+e try again.";
+ical: 14, horizontal: 16),
       decoration: BoxDecoration(
         color: Colors.white.withOpacity(0.08),
         borderRadius: BorderRadius.circular(12),
