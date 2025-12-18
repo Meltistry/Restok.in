@@ -41,7 +41,7 @@ class _StoresListPageState extends State<StoresListPage> {
             margin: const EdgeInsets.all(20),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFF5dd9e8).withOpacity(0.1),
+              color: const Color(0xFF5dd9e8).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(15),
             ),
             child: Row(
