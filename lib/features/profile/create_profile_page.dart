@@ -23,6 +23,47 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
   File? _profileImage;
   String? _email;
   bool _isGoogleSignUp = false;
+  bool _isLoading = true;
+  bool _hasExistingProfile = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExistingProfile();
+  }
+
+  Future<void> _loadExistingProfile() async {
+    final authUser = Supabase.instance.client.auth.currentUser;
+    if (authUser == null) return;
+
+    try {
+      final userResponse = await Supabase.instance.client
+          .from('users')
+          .select('nickname, description, profile_image_url')
+          .eq('email', authUser.email!)
+          .maybeSingle();
+
+      if (!mounted) return;
+
+      if (userResponse != null && userResponse['nickname'] != null) {
+        setState(() {
+          _nicknameC.text = userResponse['nickname'] ?? '';
+          _descriptionC.text = userResponse['description'] ?? '';
+          _hasExistingProfile = true;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -158,31 +199,44 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
           ),
         ),
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Form(
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF00C6FB),
+                  ),
+                )
+              : Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 20),
                     Text(
-                      'Create Profile',
+                      _hasExistingProfile ? 'Your Profile' : 'Create Profile',
                       style: theme.textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.w700,
                         color: const Color(0xFF00C6FB),
                       ),
                     ),
                     const SizedBox(height: 8),
-                    if (_isGoogleSignUp)
+                    if (_hasExistingProfile)
+                      Text(
+                        'You can update your profile or skip to continue',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.75),
+                        ),
+                      ),
+                    if (!_hasExistingProfile && _isGoogleSignUp)
                       Text(
                         'Complete your profile setup',
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: colorScheme.onSurface.withValues(alpha: 0.75),
                         ),
                       ),
-                    if (!_isGoogleSignUp && _email != null)
+                    if (!_hasExistingProfile && !_isGoogleSignUp && _email != null)
                       Text(
                         'Welcome, ${_email?.split('@')[0] ?? 'User'}!',
                         style: theme.textTheme.bodyMedium?.copyWith(
@@ -274,10 +328,37 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                     const SizedBox(height: 32),
                     Consumer<ProfileProvider>(
                       builder: (context, profileProvider, child) {
-                        return PrimaryButton(
-                          text: 'Next',
-                          isLoading: profileProvider.isLoading,
-                          onPressed: profileProvider.isLoading ? null : _handleNext,
+                        return Column(
+                          children: [
+                            PrimaryButton(
+                              text: _hasExistingProfile ? 'Update Profile' : 'Next',
+                              isLoading: profileProvider.isLoading,
+                              onPressed: profileProvider.isLoading ? null : _handleNext,
+                            ),
+                            if (_hasExistingProfile) ...[
+                              const SizedBox(height: 12),
+                              OutlinedButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/role-selection');
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color(0xFF00C6FB),
+                                  side: const BorderSide(color: Color(0xFF00C6FB)),
+                                  minimumSize: const Size(double.infinity, 56),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Skip to Role Selection',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
                         );
                       },
                     ),

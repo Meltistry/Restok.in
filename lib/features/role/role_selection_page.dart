@@ -90,14 +90,15 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
   Widget build(BuildContext context) {
     final profileProvider = context.watch<ProfileProvider>();
     
-    return PopScope(
-      canPop: false,
-      child: GradientScaffold(
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-          automaticallyImplyLeading: false,
+    return GradientScaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
         ),
+      ),
         body: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(24.0),
@@ -177,7 +178,6 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
           ),
         ),
       ),
-    ),
     );
   }
 

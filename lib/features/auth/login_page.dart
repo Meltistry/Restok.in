@@ -43,8 +43,9 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _isSubmitting = false);
 
       if (response.user != null && response.session != null) {
-        // Login successful, always go to role selection
-        Navigator.pushNamed(context, '/role-selection');
+        // Login successful, always go to create profile
+        // Create profile will check if user has data and load it
+        Navigator.pushNamed(context, '/create-profile');
         
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login berhasil!')),
@@ -86,8 +87,9 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _isSubmitting = false);
 
       if (success) {
-        // Google Sign In successful, always go to role selection
-        Navigator.pushNamed(context, '/role-selection');
+        // Google Sign In successful, always go to create profile
+        // Create profile will check if user has data and load it
+        Navigator.pushNamed(context, '/create-profile');
         
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Google Sign In berhasil!')),
