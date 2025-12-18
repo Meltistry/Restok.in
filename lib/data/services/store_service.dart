@@ -144,9 +144,10 @@ class StoreService {
   Future<String?> uploadStoreImage(String filePath, String fileName) async {
     try {
       final Uint8List bytes = await _readFileAsBytes(filePath);
+      final extension = filePath.split('.').last;
 
       final path =
-          'store_images/${DateTime.now().millisecondsSinceEpoch}_$fileName';
+          'store_images/${DateTime.now().millisecondsSinceEpoch}_$fileName.$extension';
 
       await _supabase.storage.from('stores').uploadBinary(path, bytes);
 
@@ -163,7 +164,8 @@ class StoreService {
     final file = File(filePath);
     return await file.readAsBytes();
   }
-   Future<List<StoreModel>> getStores() async {
+
+  Future<List<StoreModel>> getStores() async {
     try {
       final response = await _supabase.from('stores').select();
       final data = response as List<dynamic>;

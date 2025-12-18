@@ -38,13 +38,18 @@ class _StoreDetailRestockPageState extends State<StoreDetailRestockPage> {
 
   @override
   Widget build(BuildContext context) {
-    final currencyFormat = NumberFormat.currency(locale: 'id_ID', symbol: 'Rp ', decimalDigits: 0);
+    final currencyFormat = NumberFormat.currency(
+      locale: 'id_ID',
+      symbol: 'Rp ',
+      decimalDigits: 0,
+    );
 
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter, end: Alignment.bottomCenter,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [Color(0xFF1a2847), Color(0xFF0d1829)],
           ),
         ),
@@ -56,18 +61,39 @@ class _StoreDetailRestockPageState extends State<StoreDetailRestockPage> {
                 child: Row(
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.chevron_left, color: Colors.white, size: 30),
+                      icon: const Icon(
+                        Icons.chevron_left,
+                        color: Colors.white,
+                        size: 30,
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
-                    const CircleAvatar(radius: 20, backgroundColor: Colors.white, child: Icon(Icons.store, color: Color(0xFF1a7a8a))),
+                    const CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Colors.white,
+                      child: Icon(Icons.store, color: Color(0xFF1a7a8a)),
+                    ),
                     const SizedBox(width: 15),
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(widget.store.storeName, style: const TextStyle(color: Color(0xFF5dd9e8), fontSize: 20, fontWeight: FontWeight.bold)),
-                        Text(widget.store.storeAddress, style: const TextStyle(color: Colors.white70, fontSize: 12)),
+                        Text(
+                          widget.store.storeName,
+                          style: const TextStyle(
+                            color: Color(0xFF5dd9e8),
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          widget.store.storeAddress,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
                       ],
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -76,13 +102,18 @@ class _StoreDetailRestockPageState extends State<StoreDetailRestockPage> {
               child: Container(
                 decoration: const BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.only(topLeft: Radius.circular(30), topRight: Radius.circular(30)),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(30),
+                    topRight: Radius.circular(30),
+                  ),
                 ),
                 child: FutureBuilder<List<ItemModel>>(
                   future: _futureItems,
                   builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) return const Center(child: CircularProgressIndicator());
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) return const Center(child: Text("No items available"));
+                    if (snapshot.connectionState == ConnectionState.waiting)
+                      return const Center(child: CircularProgressIndicator());
+                    if (!snapshot.hasData || snapshot.data!.isEmpty)
+                      return const Center(child: Text("No items available"));
 
                     return ListView.separated(
                       padding: const EdgeInsets.fromLTRB(20, 25, 20, 100),
@@ -98,8 +129,18 @@ class _StoreDetailRestockPageState extends State<StoreDetailRestockPage> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(item.itemName, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF1a2847))),
-                                  Text(currencyFormat.format(item.itemPrice), style: const TextStyle(color: Colors.grey)),
+                                  Text(
+                                    item.itemName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                      color: Color(0xFF1a2847),
+                                    ),
+                                  ),
+                                  Text(
+                                    currencyFormat.format(item.itemPrice),
+                                    style: const TextStyle(color: Colors.grey),
+                                  ),
                                 ],
                               ),
                             ),
@@ -107,16 +148,50 @@ class _StoreDetailRestockPageState extends State<StoreDetailRestockPage> {
                               children: [
                                 // Badge simulasi stock alert (hardcoded seperti desain)
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 4,
+                                  ),
                                   margin: const EdgeInsets.only(right: 10),
-                                  decoration: BoxDecoration(color: const Color(0xFFffe6e6), borderRadius: BorderRadius.circular(8)),
-                                  child: const Text("-", style: TextStyle(color: Color(0xFFd32f2f), fontWeight: FontWeight.bold)),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFffe6e6),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: const Text(
+                                    "-",
+                                    style: TextStyle(
+                                      color: Color(0xFFd32f2f),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
-                                IconButton(icon: const Icon(Icons.remove_circle_outline, color: Color(0xFF1a7a8a)), onPressed: () => _updateQty(item, -1)),
-                                SizedBox(width: 30, child: Text('$qty', textAlign: TextAlign.center, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16))),
-                                IconButton(icon: const Icon(Icons.add_circle_outline, color: Color(0xFF1a7a8a)), onPressed: () => _updateQty(item, 1)),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.remove_circle_outline,
+                                    color: Color(0xFF1a7a8a),
+                                  ),
+                                  onPressed: () => _updateQty(item, -1),
+                                ),
+                                SizedBox(
+                                  width: 30,
+                                  child: Text(
+                                    '$qty',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(
+                                    Icons.add_circle_outline,
+                                    color: Color(0xFF1a7a8a),
+                                  ),
+                                  onPressed: () => _updateQty(item, 1),
+                                ),
                               ],
-                            )
+                            ),
                           ],
                         );
                       },
@@ -128,19 +203,31 @@ class _StoreDetailRestockPageState extends State<StoreDetailRestockPage> {
           ],
         ),
       ),
-      floatingActionButton: _cart.isNotEmpty ? Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: FloatingActionButton.extended(
-          backgroundColor: const Color(0xFF1a7a8a),
-          onPressed: () {
-            Navigator.push(context, MaterialPageRoute(
-              builder: (_) => RestockProofPage(cart: _cart, store: widget.store),
-            ));
-          },
-          label: Text('Restock (${_cart.length} items)', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-        ),
-      ) : null,
+      floatingActionButton: _cart.isNotEmpty
+          ? Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: FloatingActionButton.extended(
+                backgroundColor: const Color(0xFF1a7a8a),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) =>
+                          RestockProofPage(cart: _cart, store: widget.store),
+                    ),
+                  );
+                },
+                label: Text(
+                  'Restock (${_cart.length} items)',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            )
+          : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
     );
   }
