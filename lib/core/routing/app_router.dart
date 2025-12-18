@@ -10,6 +10,7 @@ import 'package:restokin/features/payment/payment_success_page.dart';
 import 'package:restokin/features/role/role_selection_page.dart';
 import 'package:restokin/features/store_owner/my_store_page.dart';
 import 'package:restokin/features/home/home_page.dart';
+import 'package:restokin/features/browse_store/stores_list_page.dart';
 
 class AppRouter {
   static const String login = '/login';
@@ -21,6 +22,7 @@ class AppRouter {
   static const String roleSelection = '/role-selection';
   static const String home = '/home';
   static const String myStore = '/my-store';
+  static const String browseStores = '/browse-stores';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -54,29 +56,30 @@ class AppRouter {
       case myStore:
         return MaterialPageRoute(builder: (_) => const MyStorePage());
 
+      case browseStores:
+        return MaterialPageRoute(builder: (_) => const StoresListPage());
+
       case home: // ✅ FIX
         return MaterialPageRoute(builder: (_) => const HomePage());
 
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
-            body: Center(
-              child: Text('No route defined for ${settings.name}'),
-            ),
+            body: Center(child: Text('No route defined for ${settings.name}')),
           ),
         );
     }
   }
 
   static Map<String, WidgetBuilder> get routes => {
-        login: (_) => const LoginPage(),
-        register: (_) => const RegisterPage(),
-        createProfile: (_) => const CreateProfilePage(),
-        selectPayment: (_) => const SelectPaymentPage(),
-        inputPayment: (_) => const InputPaymentPage(),
-        paymentSuccess: (_) => const PaymentSuccessPage(),
-        roleSelection: (_) => const RoleSelectionPage(),
-        myStore: (_) => const MyStorePage(),
-        home: (_) => const HomePage(), // ✅ FIX
-      };
+    login: (_) => const LoginPage(),
+    register: (_) => const RegisterPage(),
+    createProfile: (_) => const CreateProfilePage(),
+    selectPayment: (_) => const SelectPaymentPage(),
+    inputPayment: (_) => const InputPaymentPage(),
+    paymentSuccess: (_) => const PaymentSuccessPage(),
+    roleSelection: (_) => const RoleSelectionPage(),
+    myStore: (_) => const MyStorePage(),
+    home: (_) => const HomePage(), // ✅ FIX
+  };
 }
