@@ -48,14 +48,7 @@ class _RegisterPageState extends State<RegisterPage> {
         // Check if user session is active (email confirmation may be required)
         if (response.session != null) {
           // Session active, user is authenticated - navigate to create profile
-          Navigator.pushNamed(
-            context,
-            '/create-profile',
-            arguments: {
-              'username': _usernameC.text.trim(),
-              'email': _emailC.text.trim(),
-            },
-          );
+          Navigator.pushNamed(context, '/create-profile');
           
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Registration successful! Please complete your profile.')),
