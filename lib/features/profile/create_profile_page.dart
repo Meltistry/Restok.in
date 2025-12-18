@@ -23,7 +23,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
 
   File? _profileImage;
   String? _email;
-  String? _usernameFromArgs; 
+  String? _usernameFromArgs;
   bool _isGoogleSignUp = false;
   bool _isLoading = true;
   bool _hasExistingProfile = false;
