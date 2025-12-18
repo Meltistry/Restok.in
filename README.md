@@ -17,6 +17,7 @@ ReStock.in adalah aplikasi mobile untuk membantu pemilik toko dan UMKM mengelola
 ### Prerequisites
 
 Pastikan sudah terinstall:
+
 - [Flutter SDK](https://flutter.dev/docs/get-started/install) (versi 3.9.2 atau lebih baru)
 - [Dart SDK](https://dart.dev/get-dart) (bundled dengan Flutter)
 - Android Studio / Xcode (untuk development mobile)
@@ -257,7 +258,9 @@ lib/
 ## 👥 Tim Development
 
 ### Muhammad Iqbal Baiduri Yamani (5026221103)
+
 **Tanggung Jawab:**
+
 - ✅ Login & Register UI/UX (Figma implementation)
 - ✅ Supabase Integration (Auth + Database + Storage)
 - ✅ App bootstrapping & routing
@@ -272,9 +275,25 @@ lib/
 
 ---
 
+### Ibrahim Amar Alfanani (5026221103)
+
+**Tanggung Jawab:**
+
+- ✅ add store item page,create store page,edit store page,mystore page (UI/UX Figma implementation)
+- ✅ Supabase Integration (Database + Storage)
+- ✅ Store management (create,read,update,delete)
+- ✅ browse store(add fitur pencarian store)
+- ✅ handling upload store image(formating,integration supabase storage)
+- ✅ Database schema design & RLS policies
+- ✅ implement database design (create database with postgresql in supabase)
+- ✅ create indexing in db
+
+---
+
 ## 🎨 Fitur yang Sudah Diimplementasi
 
 ### Authentication
+
 - ✅ Login dengan Email & Password (Supabase Auth)
 - ✅ Register dengan Email & Password (Supabase Auth)
 - ✅ Google Sign In (OAuth 2.0)
@@ -284,6 +303,7 @@ lib/
 - ✅ Session management
 
 ### Profile & Payment
+
 - ✅ Create Profile (nickname, description, profile image)
 - ✅ Edit Profile
 - ✅ Profile Menu
@@ -293,6 +313,7 @@ lib/
 - ✅ Payment account details storage (JSON)
 
 ### Store Management (Store Owner)
+
 - ✅ Create Store (name, address, store image)
 - ✅ My Stores List
 - ✅ Edit Store
@@ -300,18 +321,21 @@ lib/
 - ✅ User-specific store loading (RLS)
 
 ### Browse & Restock (Restocker)
+
 - ✅ Browse Stores List
 - ✅ Store Details
 - ✅ Restock Invoice Preview
 - ✅ Upload Restock Proof
 
 ### Invoice Management
+
 - ✅ Invoice Tabs (Incoming/Outgoing)
 - ✅ Invoice Details
 - ✅ Payment Success Screen
 - ✅ Mark as Paid
 
 ### UI/UX
+
 - ✅ Material 3 Design System
 - ✅ Gradient backgrounds (Navy blue: #02173A → #032352)
 - ✅ GradientScaffold widget for consistency
@@ -323,6 +347,7 @@ lib/
 - ✅ Card tile components
 
 ### Infrastructure
+
 - ✅ Supabase integration (Auth + Database + Storage)
 - ✅ State management (Provider pattern)
 - ✅ Repository pattern
@@ -333,6 +358,7 @@ lib/
 - ✅ Storage buckets (profile-images, stores)
 
 ### Database Schema
+
 - ✅ users (auth_user_id UUID, nickname, description, role, profile_image_url)
 - ✅ stores (id_user FK, name, address, store_image_url)
 - ✅ items (store_id FK, name, stock, price)
@@ -347,6 +373,7 @@ lib/
 ## 🔐 Security Notes
 
 **PENTING:** Jangan commit file berikut ke Git:
+
 - `.env` (credentials asli)
 - `lib/secrets.dart` (jika ada)
 - `android/app/google-services.json` (jika pakai Firebase)
@@ -367,4 +394,3 @@ Copyright © 2025 ReStock.in Team (by Kelompok 8 Teknologi Berkembang - B)
 - [Supabase](https://supabase.com/)
 - [Google Fonts](https://fonts.google.com/)
 - [Material Design 3](https://m3.material.io/)
-
