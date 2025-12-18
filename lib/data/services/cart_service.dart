@@ -5,11 +5,11 @@ import '../models/item_model.dart';
 class CartService {
   final SupabaseClient _client = Supabase.instance.client;
 
-  // Fungsi untuk Submit Restock (Upload Bukti -> Buat Cart -> Masukkan Items)
+  /// Submit restock: upload proof (optional) -> create cart -> insert items -> create invoice.
   Future<void> submitRestock({
     required int storeId,
-    required Map<ItemModel, int> cartItems, // Item : Quantity
     required int storeOwnerId,
+    required Map<ItemModel, int> cartItems,
     File? proofImage,
   }) async {
     final user = _client.auth.currentUser;
@@ -17,51 +17,38 @@ class CartService {
     final int userIdNumeric = await _resolveInternalUserId(user.id);
 
     try {
-      // 1. Upload Gambar Bukti ke Supabase Storage
-      // Pastikan Anda sudah membuat bucket bernama 'restock_proofs' di dashboard Supabase
+      // Upload proof (optional)
       String? imageUrl;
       if (proofImage != null) {
         final fileExt = proofImage.path.split('.').last;
         final fileName =
             '${DateTime.now().millisecondsSinceEpoch}_${user.id}.$fileExt';
 
-        await _client.storage
-            .from('restock_proofs')
-            .upload(
+        await _client.storage.from('restock_proofs').upload(
               fileName,
               proofImage,
-              fileOptions: const FileOptions(
-                cacheControl: '3600',
-                upsert: false,
-              ),
+              fileOptions:
+                  const FileOptions(cacheControl: '3600', upsert: false),
             );
 
-        // Dapatkan Public URL gambar
         imageUrl = _client.storage
             .from('restock_proofs')
             .getPublicUrl(fileName);
       }
 
-      // 2. Insert ke tabel 'carts'
-      final cartResponse = await _client
-          .from('carts')
-          .insert({
-            'id_user':
-                userIdNumeric, // bigint-compatible; TODO: align schema to auth UUID if possible.
-            'id_store': storeId,
-            'cart_date': DateTime.now().toIso8601String(),
-            'status':
-                'active', // match enum constraint: active|checkout|abandoned
-            'restock_proof': imageUrl, // Simpan URL bukti (nullable)
-          })
-          .select()
-          .single();
+      // Insert cart
+      final cartResponse = await _client.from('carts').insert({
+        'id_user': userIdNumeric,
+        'id_store': storeId,
+        'cart_date': DateTime.now().toIso8601String(),
+        'status': 'active',
+        'restock_proof': imageUrl,
+      }).select().single();
 
       final int newCartId = cartResponse['id_cart'];
 
-      // 3. Insert ke tabel 'cart_items' (Batch Insert)
+      // Insert cart items
       final List<Map<String, dynamic>> itemsPayload = [];
-
       cartItems.forEach((item, qty) {
         itemsPayload.add({
           'id_cart': newCartId,
@@ -75,7 +62,7 @@ class CartService {
         await _client.from('cart_items').insert(itemsPayload);
       }
 
-      // 4. Insert invoice entry
+      // Create invoice
       final totalAmount = itemsPayload.fold<double>(
         0,
         (sum, item) => sum + ((item['sub_total'] as num?)?.toDouble() ?? 0),
