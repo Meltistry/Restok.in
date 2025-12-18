@@ -17,21 +17,16 @@ class PaymentMethod {
     this.paymentName,
   });
 
-  factory PaymentMethod.fromMap(Map<String, dynamic> data) {
-    return PaymentMethod(
-      id: data['id_user_payment_type'] as int,
-      userId: data['id_user'] as int,
-      paymentTypeId: data['id_payment_type'] as int,
-      paymentDetails: data['payment_details'] as String,
-      // Asumsi ada kolom is_default boolean di tabel user_payment_types
-      // Jika tidak ada, Anda perlu menambahkannya di Supabase atau menggunakan logika lain
-      isDefault: data['is_default'] ?? false, 
-      // Mengambil nama dari relasi tabel payment_types (perlu query join)
-      paymentName: data['payment_types'] != null 
-          ? data['payment_types']['payment_name'] 
-          : 'Unknown',
-    );
-  }
+  factory PaymentMethod.fromMap(Map<String, dynamic> map) {
+  return PaymentMethod(
+    id: map['id_payment'] ?? 0,
+    userId: map['id_user'],
+    paymentTypeId: map['id_payment_type'] ?? 0,
+    paymentDetails: map['payment_details'] ?? '',
+    isDefault: map['is_default'] ?? false,
+    paymentName: map['payment_name'], // Nama dari tabel payment_types
+  );
+}
 }
 class PaymentModel {
   final int idPayment;

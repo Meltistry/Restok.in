@@ -12,42 +12,66 @@ class PaymentService {
   final SupabaseClient _supabase = SupabaseService.instance;
 
   // READ: Ambil semua metode pembayaran milik user
-  Future<List<PaymentMethod>> fetchPaymentMethods(String userId) async {
-    try {
-      // Kita melakukan select pada user_payment_types
-      // Dan melakukan JOIN ke payment_types untuk mengambil payment_name
-      final response = await _supabase
-          .from('user_payment_types')
-          .select('*, payment_types(payment_name)') 
-          .eq('id_user', userId)
-          .order('id_user_payment_type', ascending: true);
+  Future<List<PaymentMethod>> fetchPaymentMethods(String email) async {
+  try {
+    // 1. Ambil ID User (angka) berdasarkan email dari tabel users
+    final userResponse = await _supabase
+        .from('users')
+        .select('id_user')
+        .eq('email', email)
+        .single();
 
-      final List<dynamic> data = response as List<dynamic>;
-      return data.map((json) => PaymentMethod.fromMap(json)).toList();
-    } catch (e) {
-      debugPrint('Error fetching payments: $e');
-      rethrow;
-    }
+    final int userIdInt = userResponse['id_user'];
+
+    // 2. Ambil data payment menggunakan ID angka tadi
+    // Gunakan join 'payment_types(name)' jika ingin mengambil nama banknya
+    final response = await _supabase
+        .from('user_payment_types')
+        .select('*, payment_types(payment_name)') 
+        .eq('id_user', userIdInt);
+
+    return (response as List).map((data) {
+      return PaymentMethod.fromMap({
+        ...data,
+        'payment_name': data['payment_types']?['payment_name'] ?? 'Unknown',
+      });
+    }).toList();
+  } catch (e) {
+    print('Error: $e');
+    rethrow;
   }
+}
 
   // UPDATE: Set Default Payment Method
   // Logika: Set semua milik user jadi false, lalu set yang dipilih jadi true
-  Future<void> setDefaultPayment(int userPaymentId, String userId) async {
+  // lib/data/services/payment_service.dart
+
+    Future<void> setDefaultPayment(int uniquePaymentId, String userUuid) async {
     try {
-      // 1. Reset semua payment method user ini menjadi non-default (false)
+      // 1. Ambil ID numerik user agar tidak kena error bigint
+      final userRes = await _supabase
+          .from('users')
+          .select('id_user')
+          .eq('email', _supabase.auth.currentUser?.email ?? '')
+          .single();
+
+      final int userIdInt = userRes['id_user'];
+
+      // 2. RESET: Set semua milik user ini menjadi false
       await _supabase
           .from('user_payment_types')
           .update({'is_default': false})
-          .eq('id_user', userId);
+          .eq('id_user', userIdInt);
 
-      // 2. Set payment method yang dipilih menjadi default (true)
+      // 3. SET DEFAULT: Gunakan ID unik baris (Primary Key), bukan ID tipe
       await _supabase
           .from('user_payment_types')
           .update({'is_default': true})
-          .eq('id_user_payment_type', userPaymentId);
+          .eq('id_user_payment_type', uniquePaymentId) // Pastikan 'id' adalah nama kolom Primary Key Anda
+          .eq('id_user', userIdInt);
           
     } catch (e) {
-      debugPrint('Error setting default payment: $e');
+      debugPrint('Error setDefault: $e');
       rethrow;
     }
   }
@@ -66,17 +90,31 @@ class PaymentService {
     }
   }
 
+  // lib/data/services/payment_service.dart
+
+  // lib/data/services/payment_service.dart
+
   Future<void> addPaymentMethod({
-    required String userId,
+    required String userUuid, // Kita terima UUID dari UI
     required int paymentTypeId,
     required String paymentDetails,
   }) async {
     try {
+      // 1. Ambil ID numerik (BigInt) berdasarkan email user yang sedang login
+      final userRes = await _supabase
+          .from('users')
+          .select('id_user')
+          .eq('email', _supabase.auth.currentUser?.email ?? '')
+          .single();
+
+      final int userIdInt = userRes['id_user'];
+
+      // 2. Masukkan data ke tabel menggunakan ID angka (userIdInt)
       await _supabase.from('user_payment_types').insert({
-        'id_user': userId,
+        'id_user': userIdInt, // SEKARANG MENGGUNAKAN INT, BUKAN UUID STRING
         'id_payment_type': paymentTypeId,
         'payment_details': paymentDetails,
-        'is_default': false, // Default false saat baru dibuat
+        'is_default': false,
       });
     } catch (e) {
       debugPrint('Error adding payment method: $e');

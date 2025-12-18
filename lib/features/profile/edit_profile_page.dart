@@ -58,7 +58,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
 
     try {
-      final profile = await _userService.fetchProfile(_currentUser.id);
+      final profile = await _userService.fetchProfile(_currentUser.email!);
       
       if (mounted) {
         setState(() {

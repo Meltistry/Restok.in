@@ -73,7 +73,7 @@ class _AddPaymentMethodPageState extends State<AddPaymentMethodPage> {
 
     try {
       await _paymentService.addPaymentMethod(
-        userId: _currentUser.id,
+        userUuid: _currentUser.id, // Ganti nama parameter menjadi userUuid jika di service diubah
         paymentTypeId: _selectedTypeId!,
         paymentDetails: _paymentDetailsC.text.trim(),
       );

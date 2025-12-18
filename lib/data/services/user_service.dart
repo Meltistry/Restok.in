@@ -12,10 +12,10 @@ class ProfileService {
   // ----------------------------------------------------
   // UPLOAD AVATAR
   // ----------------------------------------------------
-  Future<String> uploadProfilePicture(File file, String userId) async {
+  Future<String> uploadProfilePicture(File file, String email) async {
     final fileExtension = file.path.split('.').last;
     // Menggunakan user ID sebagai nama file untuk menimpa file lama
-    final fileName = 'avatar/$userId.$fileExtension'; 
+    final fileName = 'avatar/$email.$fileExtension'; 
     
     try {
       // Upload file ke Supabase Storage (Bucket 'avatars')
@@ -50,15 +50,13 @@ class ProfileService {
       final dataToSave = {
         'nickname': nickname,
         'description': description,
-        'email': email,
-        'username': username,
         'profile_image_url': profilePic, // Menggunakan nama kolom DB
       };
       
       // Update/Insert data di tabel 'users' menggunakan id_user
       await _supabase.from('users')
           .update(dataToSave)
-          .eq('id_user', userId); 
+          .eq('email', email); 
       
     } on PostgrestException catch (e) {
       debugPrint('Database Update Profile Error: ${e.message}');
@@ -69,23 +67,18 @@ class ProfileService {
   // ----------------------------------------------------
   // READ PROFILE (CRUD - R)
   // ----------------------------------------------------
-  Future<UserProfile?> fetchProfile(String userId) async {
+  Future<UserProfile?> fetchProfile(String email) async { // Gunakan email sebagai pencari
     try {
       final response = await _supabase
           .from('users')
-          .select('id_user, email, username, nickname, description, profile_image_url') // Pilih semua kolom
-          .eq('id_user', userId)
-          .single();
+          .select('id_user, email, username, nickname, description, profile_image_url')
+          .eq('email', email) // Cari berdasarkan email yang bertipe String/Varchar
+          .maybeSingle();
 
-      // Konversi Map respons ke objek UserProfile
+      if (response == null) return null;
       return UserProfile.fromMap(response);
-
-    } on PostgrestException catch (e) {
-      // Error 406 (PGRST116) berarti data tidak ditemukan (misal: user baru belum buat profil)
-      if (e.code == 'PGRST116' || e.message.contains('rows found')) {
-        return null;
-      }
-      debugPrint('Error fetchProfile: ${e.message}');
+    } catch (e) {
+      debugPrint('Error fetchProfile: $e');
       rethrow;
     }
   }

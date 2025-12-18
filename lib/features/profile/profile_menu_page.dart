@@ -48,7 +48,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
     
     try {
-      final profileModel = await _userService.fetchProfile(currentUser.id);
+      final profileModel = await _userService.fetchProfile(currentUser.email!);
       //final profileModel = await _userService.fetchProfile('4');
       
       if (mounted) {
@@ -151,6 +151,7 @@ class _ProfilePageState extends State<ProfilePage> {
       bottom: isBottomRounded ? const Radius.circular(12) : Radius.zero,
     );
 
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 15.0),
       child: Column(
@@ -160,13 +161,20 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Material(
               color: const Color(0xFFD6F6FB),
               child: InkWell(
-                onTap: () {
-                  if (route == 'logout') {
-                    _showLogoutDialog(context);
-                  } else {
-                    Navigator.of(context).pushNamed(route);
+              onTap: () async { // Tambahkan async di sini
+                if (route == 'logout') {
+                  _showLogoutDialog(context);
+                } else {
+                  // MENUNGGU HASIL: Navigator akan mengembalikan nilai dari pop()
+                  final result = await Navigator.of(context).pushNamed(route);
+
+                  // REFRESH DATA: Jika kembali membawa nilai true, ambil data terbaru
+                  if (result == true && mounted) {
+                    setState(() => _isLoading = true); // Opsional: tampilkan loading
+                    _fetchProfile(); 
                   }
-                },
+                }
+              },
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                   child: Row(

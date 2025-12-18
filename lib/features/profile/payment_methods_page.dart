@@ -37,7 +37,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
     }
 
     try {
-      final methods = await _paymentService.fetchPaymentMethods(_currentUser.id);
+      final methods = await _paymentService.fetchPaymentMethods(_currentUser.email!);
       if (mounted) {
         setState(() {
           _paymentMethods = methods;
@@ -58,7 +58,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
   Future<void> _handleSetDefault(int id) async {
     if (_currentUser == null) return;
     
-    // Optimistic Update: Ubah UI duluan biar cepat
+    // Update lokal (Optimistic)
     setState(() {
       _paymentMethods = _paymentMethods.map((m) {
         return PaymentMethod(
@@ -66,7 +66,7 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
           userId: m.userId,
           paymentTypeId: m.paymentTypeId,
           paymentDetails: m.paymentDetails,
-          isDefault: m.id == id, // Set true hanya untuk ID yang dipilih
+          isDefault: m.id == id, // Hanya satu yang true
           paymentName: m.paymentName,
         );
       }).toList();
@@ -74,13 +74,16 @@ class _PaymentMethodsPageState extends State<PaymentMethodsPage> {
 
     try {
       await _paymentService.setDefaultPayment(id, _currentUser.id);
+      
+      // REFRESH: Ambil data asli dari DB untuk sinkronisasi
+      await _fetchData(); 
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Metode pembayaran utama diperbarui!'), backgroundColor: Colors.green),
         );
       }
     } catch (e) {
-      // Jika gagal, refresh data asli dari DB
       _fetchData(); 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
