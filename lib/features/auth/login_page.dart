@@ -30,15 +30,45 @@ class _LoginPageState extends State<LoginPage> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(seconds: 1));
+    
+    try {
+      // Actual login with Supabase
+      final authService = AuthService();
+      final response = await authService.signInWithEmail(
+        email: _emailC.text.trim(),
+        password: _passwordC.text,
+      );
 
-    setState(() => _isSubmitting = false);
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
 
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Login berhasil (dummy). Implement auth!')),
-    );
-    // Navigator.pushReplacementNamed(context, '/home');
+      if (response.user != null && response.session != null) {
+        // Login successful, always go to create profile
+        // Create profile will check if user has data and load it
+        Navigator.pushNamed(context, '/create-profile');
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Login berhasil!')),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Login failed. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Login failed: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _goToRegister() {
@@ -48,22 +78,21 @@ class _LoginPageState extends State<LoginPage> {
   Future<void> _handleGoogleSignIn() async {
     try {
       setState(() => _isSubmitting = true);
-      
+
       // Implementasi Google Sign In
       final authService = AuthService();
       final success = await authService.signInWithGoogle();
-      
+
       if (!mounted) return;
       setState(() => _isSubmitting = false);
-      
+
       if (success) {
-        // Navigate to home after successful login
-        // Navigator.pushReplacementNamed(context, '/home');
+        // Google Sign In successful, always go to create profile
+        // Create profile will check if user has data and load it
+        Navigator.pushNamed(context, '/create-profile');
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Google Sign In berhasil! (Redirect ke home page)'),
-            backgroundColor: Colors.green,
-          ),
+          const SnackBar(content: Text('Google Sign In berhasil!')),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -116,11 +145,12 @@ class _LoginPageState extends State<LoginPage> {
                       child: Image.asset(
                         'assets/icons/Logo ReStock.in.png',
                         height: 180,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.store,
-                          size: 120,
-                          color: Color(0xFF008B8B),
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.store,
+                              size: 120,
+                              color: Color(0xFF008B8B),
+                            ),
                       ),
                     ),
                     const SizedBox(height: 32),
@@ -162,7 +192,7 @@ class _LoginPageState extends State<LoginPage> {
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscure ? Icons.visibility_off : Icons.visibility,
-                          color: colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: Colors.white,
                         ),
                         onPressed: () {
                           setState(() => _obscure = !_obscure);
@@ -182,8 +212,7 @@ class _LoginPageState extends State<LoginPage> {
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {
-                        },
+                        onPressed: () {},
                         child: const Text('Forgot password?'),
                       ),
                     ),
@@ -198,10 +227,7 @@ class _LoginPageState extends State<LoginPage> {
                     Row(
                       children: [
                         const Expanded(
-                          child: Divider(
-                            color: Colors.white38,
-                            thickness: 1,
-                          ),
+                          child: Divider(color: Colors.white38, thickness: 1),
                         ),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -213,10 +239,7 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                         const Expanded(
-                          child: Divider(
-                            color: Colors.white38,
-                            thickness: 1,
-                          ),
+                          child: Divider(color: Colors.white38, thickness: 1),
                         ),
                       ],
                     ),
@@ -228,16 +251,20 @@ class _LoginPageState extends State<LoginPage> {
                         'assets/icons/Logo Google.png',
                         height: 24,
                         width: 24,
-                        errorBuilder: (context, error, stackTrace) => const Icon(
-                          Icons.g_mobiledata,
-                          size: 24,
-                          color: Colors.white,
-                        ),
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                              Icons.g_mobiledata,
+                              size: 24,
+                              color: Colors.white,
+                            ),
                       ),
                       label: const Text('Continue with Google'),
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.white,
-                        side: const BorderSide(color: Colors.white38, width: 1.5),
+                        side: const BorderSide(
+                          color: Colors.white38,
+                          width: 1.5,
+                        ),
                         minimumSize: const Size.fromHeight(52),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(24),

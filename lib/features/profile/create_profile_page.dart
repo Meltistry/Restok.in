@@ -2,16 +2,12 @@
 
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
-// Import widget custom Anda
 import 'package:restokin/core/widgets/primary_button.dart';
 import 'package:restokin/core/widgets/text_field.dart';
-
-// Import service Supabase Anda
-import 'package:restokin/data/services/user_service.dart'; 
-import 'package:restokin/data/services/supabase_client.dart'; 
+import '../../state/profile_provider.dart';
 
 class CreateProfilePage extends StatefulWidget {
   const CreateProfilePage({super.key});
@@ -24,15 +20,52 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
   final _nicknameC = TextEditingController();
   final _descriptionC = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  
-  // Instance service
-  final _userService = ProfileService();
 
-  bool _isSubmitting = false;
   File? _profileImage;
   String? _email;
   String? _usernameFromArgs; 
   bool _isGoogleSignUp = false;
+  bool _isLoading = true;
+  bool _hasExistingProfile = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadExistingProfile();
+  }
+
+  Future<void> _loadExistingProfile() async {
+    final authUser = Supabase.instance.client.auth.currentUser;
+    if (authUser == null) return;
+
+    try {
+      final userResponse = await Supabase.instance.client
+          .from('users')
+          .select('nickname, description, profile_image_url')
+          .eq('email', authUser.email!)
+          .maybeSingle();
+
+      if (!mounted) return;
+
+      if (userResponse != null && userResponse['nickname'] != null) {
+        setState(() {
+          _nicknameC.text = userResponse['nickname'] ?? '';
+          _descriptionC.text = userResponse['description'] ?? '';
+          _hasExistingProfile = true;
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   void didChangeDependencies() {
@@ -61,83 +94,86 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
     _descriptionC.dispose();
     super.dispose();
   }
-  
-  // --- UTILITY METHODS ---
 
-  void _showSnackbar(String message, Color color) {
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: color),
-    );
-  }
-
-  // --- 1. LOGIKA PICK IMAGE ---
   Future<void> _pickImage() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    if (!mounted) return;
-
-    if (pickedFile != null) {
-      setState(() {
-        _profileImage = File(pickedFile.path);
-      });
-    } else {
-      _showSnackbar('Pemilihan gambar dibatalkan.', Colors.orange);
-    }
-  }
-
-  // --- 2. LOGIKA CREATE PROFILE (UPLOAD & UPDATE/INSERT CRUD) ---
-  Future<void> _handleNext() async {
-    if (!_formKey.currentState!.validate()) return;
-    
-    final currentUser = SupabaseService.instance.auth.currentUser;
-    final currentUserId = currentUser?.id;
-    
-    if (currentUserId == null || currentUser?.email == null) {
-      if (!mounted) return;
-      _showSnackbar('Error: Sesi pengguna tidak valid.', Colors.red);
-      return;
-    }
-    
-    setState(() => _isSubmitting = true);
-    
-    String? profilePicUrl;
-
     try {
-      // 1. UPLOAD FOTO PROFIL (Jika ada)
-      if (_profileImage != null) {
-        _showSnackbar('Mengunggah foto profil...', Colors.blue);
-        profilePicUrl = await _userService.uploadProfilePicture(
-          _profileImage!,
-          currentUserId,
-        );
-      }
-
-      // 2. SIMPAN/UPDATE DATA PROFIL KE TABEL 'users'
-      await _userService.updateOrCreateProfile(
-        userId: currentUserId,
-        nickname: _nicknameC.text.trim(),
-        email: currentUser!.email!,
-        description: _descriptionC.text.trim(),
-        username: _usernameFromArgs ?? _nicknameC.text.trim(),
-        profilePic: profilePicUrl, 
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
       );
 
-      if (!mounted) return;
-      
-      // 3. SUKSES: Navigasi ke halaman profile utama
-      _showSnackbar('Profil berhasil dibuat!', Colors.green);
-      Navigator.pushReplacementNamed(context, '/profile'); 
-      
-    } on StorageException catch (e) {
-      _showSnackbar('Gagal Unggah Foto: ${e.message}', Colors.red);
-    } on PostgrestException catch (e) {
-      _showSnackbar('Gagal Simpan Data: ${e.message}', Colors.red);
+      if (image != null) {
+        setState(() {
+          _profileImage = File(image.path);
+        });
+      }
     } catch (e) {
-      _showSnackbar('Error Umum: ${e.toString()}', Colors.red);
-    } finally {
-      setState(() => _isSubmitting = false);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error picking image: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _handleNext() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    // Get current authenticated user
+    final authUser = Supabase.instance.client.auth.currentUser;
+    if (authUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Not authenticated'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    // Get id_user from public.users table using email (simpler than UUID)
+    final userResponse = await Supabase.instance.client
+        .from('users')
+        .select('id_user')
+        .eq('email', authUser.email!)
+        .maybeSingle();
+
+    if (!mounted) return;
+
+    if (userResponse == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User not found: ${authUser.email}'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    final userId = userResponse['id_user'] as int;
+
+    final profileProvider = context.read<ProfileProvider>();
+    
+    final success = await profileProvider.createProfile(
+      userId: userId,
+      nickname: _nicknameC.text.trim(),
+      description: _descriptionC.text.trim().isEmpty 
+          ? null 
+          : _descriptionC.text.trim(),
+      profileImagePath: _profileImage?.path,
+    );
+
+    if (!mounted) return;
+
+    if (success) {
+      // Navigate to payment method selection
+      Navigator.pushNamed(context, '/select-payment');
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(profileProvider.error ?? 'Failed to create profile'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -146,38 +182,71 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
-    // Gradient Background
-    const gradientDecoration = BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFF02173A), Color(0xFF032352)],
-      ),
-    );
-    
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
+      extendBodyBehindAppBar: true,
       body: Container(
-        decoration: gradientDecoration,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Color(0xFF02173A), // navy
+              Color(0xFF032352), // darker navy
+            ],
+          ),
+        ),
         child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-              child: Form(
+          child: _isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    color: Color(0xFF00C6FB),
+                  ),
+                )
+              : Center(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+                    child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 20),
-                    
-                    // Title
-                    Text('Create Profile', style: theme.textTheme.headlineMedium?.copyWith(fontWeight: FontWeight.w700, color: const Color(0xFF00C6FB))),
+                    Text(
+                      _hasExistingProfile ? 'Your Profile' : 'Create Profile',
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: const Color(0xFF00C6FB),
+                      ),
+                    ),
                     const SizedBox(height: 8),
-                    
-                    // Welcome Message
-                    if (_isGoogleSignUp || _email != null)
+                    if (_hasExistingProfile)
                       Text(
-                        _isGoogleSignUp ? 'Complete your profile setup' : 'Welcome, ${_email?.split('@')[0] ?? 'User'}!',
-                        style: theme.textTheme.bodyMedium?.copyWith(color: colorScheme.onSurface.withOpacity(0.75)),
+                        'You can update your profile or skip to continue',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.75),
+                        ),
+                      ),
+                    if (!_hasExistingProfile && _isGoogleSignUp)
+                      Text(
+                        'Complete your profile setup',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.75),
+                        ),
+                      ),
+                    if (!_hasExistingProfile && !_isGoogleSignUp && _email != null)
+                      Text(
+                        'Welcome, ${_email?.split('@')[0] ?? 'User'}!',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withValues(alpha: 0.75),
+                        ),
                       ),
                     const SizedBox(height: 32),
                     
@@ -236,12 +305,41 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                       validator: (value) => null, // Optional
                     ),
                     const SizedBox(height: 32),
-                    
-                    // --- NEXT BUTTON (Submit CRUD) ---
-                    PrimaryButton(
-                      text: 'Next',
-                      isLoading: _isSubmitting,
-                      onPressed: _isSubmitting ? null : _handleNext,
+                    Consumer<ProfileProvider>(
+                      builder: (context, profileProvider, child) {
+                        return Column(
+                          children: [
+                            PrimaryButton(
+                              text: _hasExistingProfile ? 'Update Profile' : 'Next',
+                              isLoading: profileProvider.isLoading,
+                              onPressed: profileProvider.isLoading ? null : _handleNext,
+                            ),
+                            if (_hasExistingProfile) ...[
+                              const SizedBox(height: 12),
+                              OutlinedButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/role-selection');
+                                },
+                                style: OutlinedButton.styleFrom(
+                                  foregroundColor: const Color(0xFF00C6FB),
+                                  side: const BorderSide(color: Color(0xFF00C6FB)),
+                                  minimumSize: const Size(double.infinity, 56),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                ),
+                                child: const Text(
+                                  'Skip to Role Selection',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        );
+                      },
                     ),
                   ],
                 ),

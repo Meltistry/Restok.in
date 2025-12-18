@@ -32,21 +32,57 @@ class _RegisterPageState extends State<RegisterPage> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isSubmitting = true);
-    await Future.delayed(const Duration(seconds: 1));
-
-    setState(() => _isSubmitting = false);
-
-    if (!mounted) return;
     
-    // Navigate to create profile page with username
-    Navigator.pushReplacementNamed(
-      context,
-      '/create-profile',
-      arguments: {
-        'username': _usernameC.text,
-        'email': _emailC.text,
-      },
-    );
+    try {
+      // Actual registration with Supabase
+      final authService = AuthService();
+      final response = await authService.signUpWithEmail(
+        email: _emailC.text.trim(),
+        password: _passwordC.text,
+      );
+
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+
+      if (response.user != null) {
+        // Check if user session is active (email confirmation may be required)
+        if (response.session != null) {
+          // Session active, user is authenticated - navigate to create profile
+          Navigator.pushNamed(context, '/create-profile');
+          
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registration successful! Please complete your profile.')),
+          );
+        } else {
+          // Session not active - email confirmation required
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Registration successful! Please check your email to confirm your account, then login.'),
+              duration: Duration(seconds: 5),
+              backgroundColor: Colors.green,
+            ),
+          );
+          Navigator.pop(context); // Go back to login page
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Registration failed. Please try again.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (!mounted) return;
+      setState(() => _isSubmitting = false);
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error: ${e.toString()}'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   void _goToLogin() {
@@ -68,7 +104,7 @@ class _RegisterPageState extends State<RegisterPage> {
         // Get user info and navigate to create profile
         final user = authService.currentUser;
         if (user != null) {
-          Navigator.pushReplacementNamed(
+          Navigator.pushNamed(
             context,
             '/create-profile',
             arguments: {
@@ -190,7 +226,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       suffixIcon: IconButton(
                         icon: Icon(
                           _obscure ? Icons.visibility_off : Icons.visibility,
-                          color: colorScheme.onSurface.withValues(alpha: 0.7),
+                          color: Colors.white,
                         ),
                         onPressed: () {
                           setState(() => _obscure = !_obscure);

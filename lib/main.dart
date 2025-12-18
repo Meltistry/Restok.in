@@ -1,13 +1,18 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'app.dart';
-import 'data/services/supabase_client.dart';
 import 'core/config/supabase_config.dart';
+import 'data/services/supabase_client.dart';
+import 'state/auth_provider.dart';
+import 'state/store_provider.dart';
+import 'state/payment_provider.dart';
+import 'state/profile_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Supabase with deep link support
   await SupabaseService.initialize(
     url: SupabaseConfig.supabaseUrl,
@@ -22,7 +27,17 @@ void main() async {
     }
   });
 
-  runApp(const RestokInApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(create: (_) => StoreProvider()),
+        ChangeNotifierProvider(create: (_) => PaymentProvider()),
+        ChangeNotifierProvider(create: (_) => ProfileProvider()),
+      ],
+      child: const RestokInApp(),
+    ),
+  );
 }
 
 final supabase = Supabase.instance.client;
