@@ -52,7 +52,7 @@ class ProfileService {
         'description': description,
         'email': email,
         'username': username,
-        'profilepic': profilePic, // Menggunakan nama kolom DB
+        'profile_image_url': profilePic, // Menggunakan nama kolom DB
       };
       
       // Update/Insert data di tabel 'users' menggunakan id_user
@@ -73,7 +73,7 @@ class ProfileService {
     try {
       final response = await _supabase
           .from('users')
-          .select('id_user, email, username, nickname, description, profilepic') // Pilih semua kolom
+          .select('id_user, email, username, nickname, description, profile_image_url') // Pilih semua kolom
           .eq('id_user', userId)
           .single();
 

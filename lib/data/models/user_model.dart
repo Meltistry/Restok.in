@@ -26,7 +26,7 @@ class UserProfile {
       username: data['username'] as String,
       nickname: data['nickname'] ?? 'User', // Fallback jika null
       description: data['description'] ?? 'No Description', // Fallback jika null
-      profilePic: data['profilepic'] as String?, // Memetakan kolom 'profilepic'
+      profilePic: data['profile_image_url'] as String?, // Memetakan kolom 'profilepic'
     );
   }
 
@@ -37,7 +37,7 @@ class UserProfile {
       'username': username,
       'nickname': nickname,
       'description': description,
-      'profilepic': profilePic, // Gunakan nama kolom DB 'profilepic'
+      'profile_image_url': profilePic, // Gunakan nama kolom DB 'profilepic'
     };
   }
 }

@@ -45,9 +45,11 @@ class _ProfilePageState extends State<ProfilePage> {
       }
       return;
     }
+
     
     try {
       final profileModel = await _userService.fetchProfile(currentUser.id);
+      //final profileModel = await _userService.fetchProfile('4');
       
       if (mounted) {
         setState(() {
