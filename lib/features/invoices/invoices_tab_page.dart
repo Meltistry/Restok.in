@@ -6,47 +6,69 @@ import "package:restokin/features/invoices/invoice_detail_page.dart";
 import "package:restokin/state/auth_provider.dart";
 import "package:restokin/state/invoice_provider.dart";
 
-class InvoicesTabPage extends StatelessWidget {
+class InvoicesTabPage extends StatefulWidget {
   const InvoicesTabPage({super.key});
 
   @override
-  InvoicesTabPageState createState() => InvoicesTabPageState();
+  State<InvoicesTabPage> createState() => _InvoicesTabPageState();
 }
 
-class InvoicesTabPageState extends State<InvoicesTabPage> {
-  late List<InvoiceModel> incomingInvoices;
-  late List<InvoiceModel> outgoingInvoices;
+class _InvoicesTabPageState extends State<InvoicesTabPage> {
+  final InvoiceProvider _provider = InvoiceProvider();
+  String? _userId;
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    incomingInvoices = InvoiceService.getIncomingInvoices();
-    outgoingInvoices = InvoiceService.getOutgoingInvoices();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final auth = context.read<AuthProvider?>();
+    final currentUserId = auth?.user?.id;
+    if (!_initialized || _userId != currentUserId) {
+      _userId = currentUserId;
+      _initialized = true;
+      if (_userId != null) {
+        _provider.loadInvoices(userId: _userId!);
+      }
+    }
   }
 
+  @override
+  void dispose() {
+    _provider.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Invoices"),
-          bottom: const TabBar(
-            indicatorColor: AppColors.surface,
-            labelColor: AppColors.surface,
-            unselectedLabelColor: AppColors.textSecondary,
-            tabs: [
-              Tab(text: "Incoming"),
-              Tab(text: "Outgoing"),
+    return ChangeNotifierProvider<InvoiceProvider>.value(
+      value: _provider,
+      child: DefaultTabController(
+        length: 2,
+        child: Scaffold(
+          appBar: AppBar(
+            title: const Text("Invoices"),
+            bottom: const TabBar(
+              indicatorColor: AppColors.surface,
+              labelColor: AppColors.surface,
+              unselectedLabelColor: AppColors.textSecondary,
+              tabs: [
+                Tab(text: "Incoming"),
+                Tab(text: "Outgoing"),
+              ],
+            ),
+          ),
+          body: TabBarView(
+            children: [
+              _InvoiceListSection(
+                mode: _InvoiceListMode.incoming,
+                userId: _userId,
+              ),
+              _InvoiceListSection(
+                mode: _InvoiceListMode.outgoing,
+                userId: _userId,
+              ),
             ],
           ),
-        ),
-        body: const TabBarView(
-          children: [
-            _InvoiceListSection(mode: _InvoiceListMode.incoming),
-            _InvoiceListSection(mode: _InvoiceListMode.outgoing),
-          ],
         ),
       ),
     );
@@ -54,25 +76,33 @@ class InvoicesTabPageState extends State<InvoicesTabPage> {
 }
 
 class _InvoiceListSection extends StatelessWidget {
-  const _InvoiceListSection({required this.mode});
+  const _InvoiceListSection({required this.mode, required this.userId});
 
   final _InvoiceListMode mode;
+  final String? userId;
 
   @override
   Widget build(BuildContext context) {
+    if (userId == null) {
+      return const _ErrorState(
+        message: "User not available. Please sign in.",
+        onRetry: null,
+      );
+    }
+
     return Consumer<InvoiceProvider>(
       builder: (context, provider, _) {
         final invoices = mode == _InvoiceListMode.incoming
-            ? provider.incomingInvoices
-            : provider.outgoingInvoices;
+            ? provider.incomingInvoices(userId!)
+            : provider.outgoingInvoices(userId!);
 
         Widget child;
-        if (provider.isLoading) {
+        if (provider.isLoadingList) {
           child = const _LoadingState();
-        } else if (provider.errorMessage != null) {
+        } else if (provider.listError != null) {
           child = _ErrorState(
-            message: provider.errorMessage!,
-            onRetry: provider.refresh,
+            message: provider.listError!,
+            onRetry: () => provider.refreshInvoices(userId!),
           );
         } else if (invoices.isEmpty) {
           child = _EmptyState(mode: mode);
@@ -91,7 +121,7 @@ class _InvoiceListSection extends StatelessWidget {
 
         return RefreshIndicator(
           color: AppColors.primary,
-          onRefresh: provider.refresh,
+          onRefresh: () => provider.refreshInvoices(userId!),
           child: child,
         );
       },
@@ -100,10 +130,7 @@ class _InvoiceListSection extends StatelessWidget {
 }
 
 class _InvoiceCard extends StatelessWidget {
-  const _InvoiceCard({
-    required this.invoice,
-    required this.mode,
-  });
+  const _InvoiceCard({required this.invoice, required this.mode});
 
   final InvoiceModel invoice;
   final _InvoiceListMode mode;
@@ -111,7 +138,8 @@ class _InvoiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isPaid = invoice.paymentStatus.toLowerCase().contains("paid");
+    final status = invoice.paymentStatus.toLowerCase();
+    final isPaid = status == "paid";
     final statusLabel = isPaid ? "Paid" : "Waiting Payment";
     final statusColor = isPaid ? AppColors.success : AppColors.danger;
     final proofUrl = _resolveProofImage(invoice);
@@ -153,7 +181,11 @@ class _InvoiceCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   Row(
                     children: [
-                      Icon(Icons.calendar_today, size: 14, color: Colors.black54),
+                      const Icon(
+                        Icons.calendar_today,
+                        size: 14,
+                        color: Colors.black54,
+                      ),
                       const SizedBox(width: 6),
                       Expanded(
                         child: Text(
@@ -169,7 +201,11 @@ class _InvoiceCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   Row(
                     children: [
-                      Icon(Icons.payments_rounded, size: 16, color: Colors.black54),
+                      const Icon(
+                        Icons.payments_rounded,
+                        size: 16,
+                        color: Colors.black54,
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         "Rp${invoice.totalAmount.toStringAsFixed(2)}",
@@ -211,13 +247,12 @@ class _InvoiceCard extends StatelessWidget {
         builder: (_) => InvoiceDetailPage(
           invoiceId: invoice.invoiceNumber,
           mode: mode.name,
-          roleHint: mode == _InvoiceListMode.outgoing ? "restocker" : "storeOwner",
+          roleHint: mode == _InvoiceListMode.outgoing
+              ? "restocker"
+              : "storeOwner",
         ),
         settings: RouteSettings(
-          arguments: {
-            "invoiceId": invoice.invoiceNumber,
-            "mode": mode.name,
-          },
+          arguments: {"invoiceId": invoice.invoiceNumber, "mode": mode.name},
         ),
       ),
     );
@@ -230,10 +265,7 @@ class _InvoiceCard extends StatelessWidget {
 }
 
 class _StatusChip extends StatelessWidget {
-  const _StatusChip({
-    required this.label,
-    required this.color,
-  });
+  const _StatusChip({required this.label, required this.color});
 
   final String label;
   final Color color;
@@ -250,9 +282,9 @@ class _StatusChip extends StatelessWidget {
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: color,
-              fontWeight: FontWeight.w700,
-            ),
+          color: color,
+          fontWeight: FontWeight.w700,
+        ),
       ),
     );
   }
@@ -275,7 +307,10 @@ class _ProofThumbnail extends StatelessWidget {
             ? Colors.white.withOpacity(0.25)
             : Colors.grey.shade200,
         child: proofUrl == null
-            ? const Icon(Icons.receipt_long_rounded, color: AppColors.background)
+            ? const Icon(
+                Icons.receipt_long_rounded,
+                color: AppColors.background,
+              )
             : Image.network(
                 proofUrl!,
                 fit: BoxFit.cover,
@@ -311,14 +346,18 @@ class _EmptyState extends StatelessWidget {
           ),
           child: Column(
             children: [
-              const Icon(Icons.receipt_outlined, color: AppColors.surface, size: 40),
+              const Icon(
+                Icons.receipt_outlined,
+                color: AppColors.surface,
+                size: 40,
+              ),
               const SizedBox(height: 12),
               Text(
                 text,
                 style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      color: AppColors.surface,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: AppColors.surface,
+                  fontWeight: FontWeight.w600,
+                ),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -330,13 +369,10 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _ErrorState extends StatelessWidget {
-  const _ErrorState({
-    required this.message,
-    required this.onRetry,
-  });
+  const _ErrorState({required this.message, required this.onRetry});
 
   final String message;
-  final Future<void> Function() onRetry;
+  final Future<void> Function()? onRetry;
 
   @override
   Widget build(BuildContext context) {
@@ -352,21 +388,23 @@ class _ErrorState extends StatelessWidget {
           ),
           child: Column(
             children: [
-              const Icon(Icons.error_outline, color: AppColors.danger, size: 40),
+              const Icon(
+                Icons.error_outline,
+                color: AppColors.danger,
+                size: 40,
+              ),
               const SizedBox(height: 12),
               Text(
                 message,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppColors.surface,
-                      fontWeight: FontWeight.w600,
-                    ),
+                  color: AppColors.surface,
+                  fontWeight: FontWeight.w600,
+                ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: onRetry,
-                child: const Text("Retry"),
-              ),
+              if (onRetry != null)
+                ElevatedButton(onPressed: onRetry, child: const Text("Retry")),
             ],
           ),
         ),
@@ -384,9 +422,7 @@ class _LoadingState extends StatelessWidget {
       physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(top: 160),
       children: const [
-        Center(
-          child: CircularProgressIndicator(color: AppColors.surface),
-        ),
+        Center(child: CircularProgressIndicator(color: AppColors.surface)),
       ],
     );
   }

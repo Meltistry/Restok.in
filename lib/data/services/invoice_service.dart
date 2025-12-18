@@ -7,26 +7,39 @@ import "package:supabase_flutter/supabase_flutter.dart";
 /// Uses Supabase when available. Adjust table/column names in [_Table] constants.
 class InvoiceService {
   InvoiceService({SupabaseClient? supabase})
-      : _supabase = supabase ?? SupabaseService.instance;
+    : _supabase = supabase ?? SupabaseService.instance;
 
   final SupabaseClient _supabase;
 
-  Future<List<InvoiceModel>> fetchInvoicesForUser({required String userId}) async {
+  Future<List<InvoiceModel>> fetchInvoicesForUser({
+    required String userId,
+  }) async {
+    // Schema uses id_restocker/id_store_owner (bigint). Auth id is UUID, so user-based filtering
+    // is skipped to avoid errors; fetch all visible invoices and filter client-side if needed.
+    final response = await _selectInvoices(userIdFilter: null);
+    return response.map(_mapRow).toList();
+  }
+
+  Future<List<dynamic>> _selectInvoices({String? userIdFilter}) async {
     try {
-      final response = await _supabase
-          .from(_Table.invoices)
-          .select("*")
-          // TODO: Adjust filters to payer/payee/type once schema is known.
-          .or("payer_id.eq.$userId,payee_id.eq.$userId");
+      final query = _supabase.from(_Table.invoices).select("*");
+
+      // TODO: adjust to actual column names once schema is known.
+      if (userIdFilter != null) {
+        query.or(
+          "${_Columns.payerId}.eq.$userIdFilter,${_Columns.payeeId}.eq.$userIdFilter",
+        );
+      }
+
+      final response = await query;
 
       if (response is! List) {
         throw Exception("Unexpected response when fetching invoices");
       }
 
-      return response
-          .map((row) => _mapRow(row))
-          .toList();
+      return response as List;
     } catch (e) {
+      if (e is PostgrestException) rethrow;
       throw Exception("Failed to fetch invoices: $e");
     }
   }
@@ -101,8 +114,12 @@ class _Table {
 }
 
 class _Columns {
-  static const String invoiceId = "invoice_number"; // TODO: Map to actual id column.
-  static const String status = "payment_status"; // TODO: Map to actual status column.
-  static const String proofImageUrl = "proof_image_url"; // TODO: Map to actual proof field.
-  static const String paidAt = "paid_at"; // TODO: Map to actual paid timestamp field.
+  static const String invoiceId = "id_invoice"; // matches schema
+  static const String status = "status"; // matches schema (unpaid/paid/...)
+  static const String proofImageUrl =
+      "proof_image_url"; // TODO: Map to actual proof field.
+  static const String paidAt =
+      "paid_at"; // TODO: Map to actual paid timestamp field.
+  static const String payerId = "payer_id"; // TODO: Map to actual payer column.
+  static const String payeeId = "payee_id"; // TODO: Map to actual payee column.
 }

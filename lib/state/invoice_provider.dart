@@ -6,13 +6,13 @@ import "package:restokin/data/services/payment_service.dart";
 
 /// State management for invoices list, detail, and payment.
 class InvoiceProvider extends ChangeNotifier {
-  InvoiceProvider({
-    InvoiceRepository? repository,
-  }) : _repository = repository ??
-            InvoiceRepository(
-              invoiceService: InvoiceService(),
-              paymentService: PaymentService(),
-            );
+  InvoiceProvider({InvoiceRepository? repository})
+    : _repository =
+          repository ??
+          InvoiceRepository(
+            invoiceService: InvoiceService(),
+            paymentService: PaymentService(),
+          );
 
   final InvoiceRepository _repository;
 
@@ -46,7 +46,10 @@ class InvoiceProvider extends ChangeNotifier {
 
   InvoiceModel? getDetail(String invoiceId) => _details[invoiceId];
 
-  Future<void> loadInvoices({required String userId, bool forceRefresh = false}) async {
+  Future<void> loadInvoices({
+    required String userId,
+    bool forceRefresh = false,
+  }) async {
     if (_isLoadingList) return;
     if (!forceRefresh && _invoices.isNotEmpty) return;
 
@@ -84,7 +87,9 @@ class InvoiceProvider extends ChangeNotifier {
       final invoice = await _repository.getInvoiceDetail(invoiceId);
       _details[invoiceId] = invoice;
       // Keep list in sync if present.
-      final index = _invoices.indexWhere((inv) => inv.invoiceNumber == invoiceId);
+      final index = _invoices.indexWhere(
+        (inv) => inv.invoiceNumber == invoiceId,
+      );
       if (index != -1) {
         _invoices[index] = invoice;
       }
@@ -131,7 +136,7 @@ class InvoiceProvider extends ChangeNotifier {
     }
   }
 
-  void _markPaid(String invoiceId, DateTime? paidAt) {
+  void markInvoicePaid(String invoiceId, {DateTime? paidAt}) {
     void updateModel(InvoiceModel inv) {
       inv.paymentStatus = "Paid";
       // TODO: map paidAt to model field when available.
@@ -145,6 +150,10 @@ class InvoiceProvider extends ChangeNotifier {
         updateModel(_invoices[i]);
       }
     }
+  }
+
+  void _markPaid(String invoiceId, DateTime? paidAt) {
+    markInvoicePaid(invoiceId, paidAt: paidAt);
   }
 
   bool _isIncoming(InvoiceModel invoice, String userId) {

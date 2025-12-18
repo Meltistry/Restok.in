@@ -1,5 +1,8 @@
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../data/models/store_model.dart';
 import '../../data/models/item_model.dart';
@@ -17,26 +20,58 @@ class RestockProofPage extends StatefulWidget {
 
 class _RestockProofPageState extends State<RestockProofPage> {
   File? _image;
+  Uint8List? _imageBytes;
+  Uint8List? _placeholderBytes;
   final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPlaceholder();
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     final XFile? picked = await _picker.pickImage(source: source);
     if (picked != null) {
-      setState(() => _image = File(picked.path));
+      if (!kIsWeb) {
+        setState(() {
+          _image = File(picked.path);
+          _imageBytes = null;
+        });
+      } else {
+        final bytes = await picked.readAsBytes();
+        setState(() {
+          _image = null;
+          _imageBytes = bytes;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadPlaceholder() async {
+    try {
+      final data = await rootBundle.load('assets/icons/Logo ReStock.in.png');
+      setState(() {
+        _placeholderBytes = data.buffer.asUint8List();
+      });
+    } catch (_) {
+      // ignore if missing
     }
   }
 
   void _onContinue() {
-    if (_image == null) return;
-
-    // Pindah ke halaman Preview Invoice membawa data
-    Navigator.push(context, MaterialPageRoute(
-      builder: (_) => RestockInvoicePreviewPage(
-        cart: widget.cart,
-        store: widget.store,
-        proofImage: _image!,
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => RestockInvoicePreviewPage(
+          cart: widget.cart,
+          store: widget.store,
+          proofImage: _image,
+          proofBytes: _imageBytes,
+          placeholderBytes: _placeholderBytes,
+        ),
       ),
-    ));
+    );
   }
 
   @override
@@ -63,33 +98,44 @@ class _RestockProofPageState extends State<RestockProofPage> {
                   boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.2), blurRadius: 10)],
                 ),
                 child: _image == null
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.camera_alt, size: 80, color: Color(0xFF1a7a8a)),
-                        const SizedBox(height: 10),
-                        Text("Take a picture of proof\nor add from gallery",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(color: Colors.grey[600]),
-                        )
-                      ],
-                    )
-                  : Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(25),
-                          child: Image.file(_image!, fit: BoxFit.cover),
-                        ),
-                        Positioned(
-                          right: 10, top: 10,
-                          child: GestureDetector(
-                            onTap: () => setState(() => _image = null),
-                            child: const CircleAvatar(backgroundColor: Colors.red, radius: 18, child: Icon(Icons.close, color: Colors.white)),
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const Icon(Icons.camera_alt, size: 80, color: Color(0xFF1a7a8a)),
+                          const SizedBox(height: 10),
+                          Text(
+                            "Take a picture of proof\nor add from gallery",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: Colors.grey[600]),
+                          )
+                        ],
+                      )
+                    : Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(25),
+                            child: _imageBytes != null
+                                ? Image.memory(_imageBytes!, fit: BoxFit.cover)
+                                : Image.file(_image!, fit: BoxFit.cover),
                           ),
-                        )
-                      ],
-                    ),
+                          Positioned(
+                            right: 10,
+                            top: 10,
+                            child: GestureDetector(
+                              onTap: () => setState(() {
+                                _image = null;
+                                _imageBytes = null;
+                              }),
+                              child: const CircleAvatar(
+                                backgroundColor: Colors.red,
+                                radius: 18,
+                                child: Icon(Icons.close, color: Colors.white),
+                              ),
+                            ),
+                          )
+                        ],
+                      ),
               ),
             ),
             const SizedBox(height: 20),
@@ -107,7 +153,7 @@ class _RestockProofPageState extends State<RestockProofPage> {
             ),
             const SizedBox(height: 15),
             ElevatedButton(
-              onPressed: _image == null ? null : _onContinue,
+              onPressed: _onContinue,
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
                 foregroundColor: const Color(0xFF1a7a8a),
