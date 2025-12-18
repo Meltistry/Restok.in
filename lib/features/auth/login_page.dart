@@ -43,7 +43,8 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _isSubmitting = false);
 
       if (response.user != null && response.session != null) {
-        // Login successful, navigate to create profile
+        // Login successful, always go to create profile
+        // Create profile will check if user has data and load it
         Navigator.pushNamed(context, '/create-profile');
         
         ScaffoldMessenger.of(context).showSnackBar(
@@ -86,19 +87,13 @@ class _LoginPageState extends State<LoginPage> {
       setState(() => _isSubmitting = false);
 
       if (success) {
-        // Get user info and navigate to create profile
-        final user = authService.currentUser;
-        if (user != null && mounted) {
-          Navigator.pushNamed(
-            context,
-            '/create-profile',
-            arguments: {
-              'email': user.email ?? '',
-              'username': user.userMetadata?['name'] ?? user.email?.split('@')[0] ?? '',
-              'isGoogleSignIn': true,
-            },
-          );
-        }
+        // Google Sign In successful, always go to create profile
+        // Create profile will check if user has data and load it
+        Navigator.pushNamed(context, '/create-profile');
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Google Sign In berhasil!')),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(

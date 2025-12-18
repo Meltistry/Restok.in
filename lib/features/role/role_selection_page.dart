@@ -66,7 +66,7 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
     if (success) {
       // Navigate based on role
       if (_selectedRole == 'store_owner') {
-        Navigator.pushReplacementNamed(context, '/my-store');
+        Navigator.pushNamed(context, '/my-store');
       } else {
         // Navigate to restocker home (belum ada)
         ScaffoldMessenger.of(context).showSnackBar(
@@ -99,15 +99,15 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              const Text(
-                "Let's set things up",
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
+                const Text(
+                  "Let's set things up",
                 style: TextStyle(
                   color: Color(0xFFB8E6E6),
                   fontSize: 32,

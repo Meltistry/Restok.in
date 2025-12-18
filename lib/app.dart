@@ -9,6 +9,7 @@ import 'features/payment/input_payment_page.dart';
 import 'features/payment/payment_success_page.dart';
 import 'features/role/role_selection_page.dart';
 import 'features/store_owner/my_store_page.dart';
+import 'features/browse_store/stores_list_page.dart';
 
 class RestokInApp extends StatelessWidget {
   const RestokInApp({super.key});
@@ -31,6 +32,7 @@ class RestokInApp extends StatelessWidget {
         '/payment-success': (_) => const PaymentSuccessPage(),
         '/role-selection': (_) => const RoleSelectionPage(),
         '/my-store': (_) => const MyStorePage(),
+         '/browse-stores': (_) => const StoresListPage(),
       },
     );
   }
