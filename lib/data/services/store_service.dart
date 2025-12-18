@@ -163,4 +163,28 @@ class StoreService {
     final file = File(filePath);
     return await file.readAsBytes();
   }
+   Future<List<StoreModel>> getStores() async {
+    try {
+      final response = await _supabase.from('stores').select();
+      final data = response as List<dynamic>;
+      return data.map((json) => StoreModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Gagal mengambil data toko: $e');
+    }
+  }
+
+  // Mengambil item berdasarkan ID Toko
+  Future<List<ItemModel>> getItemsByStore(int storeId) async {
+    try {
+      final response = await _supabase
+          .from('items')
+          .select()
+          .eq('id_store', storeId);
+
+      final data = response as List<dynamic>;
+      return data.map((json) => ItemModel.fromJson(json)).toList();
+    } catch (e) {
+      throw Exception('Gagal mengambil barang: $e');
+    }
+  }
 }

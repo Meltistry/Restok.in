@@ -93,7 +93,7 @@ class _MyStorePageState extends State<MyStorePage> {
     }
 
     final userId = userResponse['id_user'] as int;
-    
+
     // Load stores for this user
     context.read<StoreProvider>().loadUserStores(userId);
   }

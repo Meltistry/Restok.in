@@ -479,7 +479,7 @@ class _EditItemDialogState extends State<_EditItemDialog> {
 
   Future<void> _deleteItem() async {
     final storeProvider = context.read<StoreProvider>();
-    
+
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
