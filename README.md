@@ -275,7 +275,7 @@ lib/
 
 ---
 
-### Ibrahim Amar Alfanani (5026221103)
+### Ibrahim Amar Alfanani (5026231195)
 
 **Tanggung Jawab:**
 
