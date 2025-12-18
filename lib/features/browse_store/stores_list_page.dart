@@ -72,7 +72,13 @@ class _StoresListPageState extends State<StoresListPage> {
             color: Color(0xFF5dd9e8),
             size: 30,
           ),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/home',
+              (route) => false,
+            );
+          },
         ),
       ),
       body: Column(

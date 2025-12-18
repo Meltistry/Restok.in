@@ -349,6 +349,8 @@ class _AddItemDialogState extends State<_AddItemDialog> {
   Future<void> _addItem() async {
     if (!_formKey.currentState!.validate()) return;
 
+    print("Menambahkan item ke Store ID: ${widget.storeId}");
+
     final price = int.tryParse(
       _priceController.text.replaceAll(RegExp(r'[^0-9]'), ''),
     );

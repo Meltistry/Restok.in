@@ -7,7 +7,6 @@ import '../../core/widgets/gradient_scaffold.dart';
 import '../../state/profile_provider.dart';
 import '../../core/routing/app_router.dart';
 
-
 class RoleSelectionPage extends StatefulWidget {
   const RoleSelectionPage({super.key});
 
@@ -80,19 +79,18 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
 
     // ✅ ROLE-BASED NAVIGATION
     if (_selectedRole == 'store_owner') {
-  Navigator.pushNamedAndRemoveUntil(
-    context,
-    AppRouter.myStore,
-    (route) => false,
-  );
-} else {
-  Navigator.pushNamedAndRemoveUntil(
-    context,
-    AppRouter.home,
-    (route) => false,
-  );
-}
-
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRouter.myStore,
+        (route) => false,
+      );
+    } else {
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        AppRouter.browseStores,
+        (route) => false,
+      );
+    }
   }
 
   @override
@@ -185,10 +183,7 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
     );
   }
 
-  Widget _buildRoleOption({
-    required String label,
-    required String value,
-  }) {
+  Widget _buildRoleOption({required String label, required String value}) {
     final isSelected = _selectedRole == value;
 
     return GestureDetector(

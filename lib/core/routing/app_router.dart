@@ -16,6 +16,7 @@ import 'package:restokin/features/profile/edit_profile_page.dart';
 import 'package:restokin/features/profile/change_password_page.dart';
 import 'package:restokin/features/profile/payment_methods_page.dart';
 import 'package:restokin/features/profile/add_payment_method_page.dart';
+import 'package:restokin/features/browse_store/stores_list_page.dart';
 
 class AppRouter {
   static const String login = '/login';
@@ -33,6 +34,7 @@ class AppRouter {
   static const String changePassword = '/profile/changepassword';
   static const String paymentMethods = '/profile/paymentmethods';
   static const String addPayment = '/payment/add';
+  static const String browseStores = '/browse-stores';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -66,15 +68,16 @@ class AppRouter {
       case myStore:
         return MaterialPageRoute(builder: (_) => const MyStorePage());
 
+      case browseStores:
+        return MaterialPageRoute(builder: (_) => const StoresListPage());
+
       case home: // ✅ FIX
         return MaterialPageRoute(builder: (_) => const HomePage());
 
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
-            body: Center(
-              child: Text('No route defined for ${settings.name}'),
-            ),
+            body: Center(child: Text('No route defined for ${settings.name}')),
           ),
         );
     }
