@@ -22,7 +22,9 @@ class PaymentModel {
   final DateTime? paidAt;
 
   /// Backward-compatible helpers for legacy code.
-  bool get isSuccess => (status ?? "").toLowerCase() == "success" || (status ?? "").toLowerCase() == "paid";
+  bool get isSuccess =>
+      (status ?? "").toLowerCase() == "success" ||
+      (status ?? "").toLowerCase() == "paid";
   bool get isPending => (status ?? "").toLowerCase() == "pending";
   bool get isFailed => (status ?? "").toLowerCase() == "failed";
   String get paymentDate => paidAt?.toIso8601String() ?? "";
@@ -32,14 +34,22 @@ class PaymentModel {
     final paidAtRaw = json["paid_at"] ?? json["paidAt"];
     return PaymentModel(
       id: (json["id"] ?? json["id_payment"] ?? "").toString(),
-      invoiceId: (json["invoice_id"] ?? json["id_invoice"] ?? json["invoiceId"] ?? "").toString(),
+      invoiceId:
+          (json["invoice_id"] ?? json["id_invoice"] ?? json["invoiceId"] ?? "")
+              .toString(),
       payerId: (json["payer_id"] ?? json["payerId"] ?? "").toString(),
       payeeId: (json["payee_id"] ?? json["payeeId"] ?? "").toString(),
       amount: _toDouble(json["amount"]),
-      proofImageUrl: json["proof_image_url"]?.toString() ?? json["proofImageUrl"]?.toString(),
-      paymentTypeId: json["payment_type_id"]?.toString() ?? json["paymentTypeId"]?.toString(),
+      proofImageUrl:
+          json["proof_image_url"]?.toString() ??
+          json["proofImageUrl"]?.toString(),
+      paymentTypeId:
+          json["payment_type_id"]?.toString() ??
+          json["paymentTypeId"]?.toString(),
       status: json["status"]?.toString(),
-      paidAt: paidAtRaw != null ? DateTime.tryParse(paidAtRaw.toString()) : null,
+      paidAt: paidAtRaw != null
+          ? DateTime.tryParse(paidAtRaw.toString())
+          : null,
     );
   }
 

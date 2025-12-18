@@ -282,6 +282,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   void _navigateToProfile() {
-    Navigator.pushNamed(context, '/create-profile');
+    Navigator.pushNamed(context, '/profile');
   }
 }

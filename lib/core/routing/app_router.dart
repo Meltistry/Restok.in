@@ -10,6 +10,12 @@ import 'package:restokin/features/payment/payment_success_page.dart';
 import 'package:restokin/features/role/role_selection_page.dart';
 import 'package:restokin/features/store_owner/my_store_page.dart';
 import 'package:restokin/features/home/home_page.dart';
+//profile
+import 'package:restokin/features/profile/profile_menu_page.dart';
+import 'package:restokin/features/profile/edit_profile_page.dart';
+import 'package:restokin/features/profile/change_password_page.dart';
+import 'package:restokin/features/profile/payment_methods_page.dart';
+import 'package:restokin/features/profile/add_payment_method_page.dart';
 import 'package:restokin/features/browse_store/stores_list_page.dart';
 
 class AppRouter {
@@ -22,6 +28,12 @@ class AppRouter {
   static const String roleSelection = '/role-selection';
   static const String home = '/home';
   static const String myStore = '/my-store';
+  //profileScreens
+  static const String profile = '/profile';
+  static const String editProfile = '/profile/edit';
+  static const String changePassword = '/profile/changepassword';
+  static const String paymentMethods = '/profile/paymentmethods';
+  static const String addPayment = '/payment/add';
   static const String browseStores = '/browse-stores';
 
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -72,14 +84,20 @@ class AppRouter {
   }
 
   static Map<String, WidgetBuilder> get routes => {
-    login: (_) => const LoginPage(),
-    register: (_) => const RegisterPage(),
-    createProfile: (_) => const CreateProfilePage(),
-    selectPayment: (_) => const SelectPaymentPage(),
-    inputPayment: (_) => const InputPaymentPage(),
-    paymentSuccess: (_) => const PaymentSuccessPage(),
-    roleSelection: (_) => const RoleSelectionPage(),
-    myStore: (_) => const MyStorePage(),
-    home: (_) => const HomePage(), // ✅ FIX
-  };
+        login: (_) => const LoginPage(),
+        register: (_) => const RegisterPage(),
+        createProfile: (_) => const CreateProfilePage(),
+        selectPayment: (_) => const SelectPaymentPage(),
+        inputPayment: (_) => const InputPaymentPage(),
+        paymentSuccess: (_) => const PaymentSuccessPage(),
+        roleSelection: (_) => const RoleSelectionPage(),
+        myStore: (_) => const MyStorePage(),
+        home: (_) => const HomePage(), // ✅ FIX
+        //profileScreens
+        profile: (_) => const ProfilePage(), 
+        editProfile : (_) => const EditProfilePage(),
+        changePassword : (_) => const ChangePasswordPage(),
+        paymentMethods: (_) => const PaymentMethodsPage(),
+        addPayment: (context) => const AddPaymentMethodPage(),
+      };
 }

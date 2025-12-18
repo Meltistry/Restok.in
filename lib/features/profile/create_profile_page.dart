@@ -1,4 +1,5 @@
 // lib/features/profile/create_profile_page.dart
+
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -22,6 +23,7 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
 
   File? _profileImage;
   String? _email;
+  String? _usernameFromArgs;
   bool _isGoogleSignUp = false;
   bool _isLoading = true;
   bool _hasExistingProfile = false;
@@ -68,11 +70,14 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Get data from register or Google sign up
+    
     final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     if (args != null) {
-      if (args['username'] != null && _nicknameC.text.isEmpty) {
-        _nicknameC.text = args['username'];
+      if (args['username'] != null) {
+        _usernameFromArgs = args['username'];
+        if (_nicknameC.text.isEmpty) {
+          _nicknameC.text = args['username'];
+        }
       }
       if (args['email'] != null) {
         _email = args['email'];
@@ -244,7 +249,8 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                         ),
                       ),
                     const SizedBox(height: 32),
-                    // Profile Picture
+                    
+                    // --- PROFILE PICTURE (IMAGE PICKER) ---
                     Center(
                       child: GestureDetector(
                         onTap: _pickImage,
@@ -253,17 +259,10 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                             CircleAvatar(
                               radius: 60,
                               backgroundColor: colorScheme.primary,
-                              backgroundImage: _profileImage != null
-                                  ? FileImage(_profileImage!)
-                                  : null,
-                              child: _profileImage == null
-                                  ? const Icon(
-                                      Icons.person,
-                                      size: 60,
-                                      color: Colors.white,
-                                    )
-                                  : null,
+                              backgroundImage: _profileImage != null ? FileImage(_profileImage!) : null,
+                              child: _profileImage == null ? const Icon(Icons.person, size: 60, color: Colors.white) : null,
                             ),
+                            // Tombol Kamera
                             Positioned(
                               bottom: 0,
                               right: 0,
@@ -272,16 +271,9 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                                 decoration: BoxDecoration(
                                   color: const Color(0xFF00C6FB),
                                   shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: const Color(0xFF02173A),
-                                    width: 3,
-                                  ),
+                                  border: Border.all(color: const Color(0xFF02173A), width: 3),
                                 ),
-                                child: const Icon(
-                                  Icons.camera_alt,
-                                  size: 20,
-                                  color: Colors.white,
-                                ),
+                                child: const Icon(Icons.camera_alt, size: 20, color: Colors.white),
                               ),
                             ),
                           ],
@@ -289,41 +281,28 @@ class _CreateProfilePageState extends State<CreateProfilePage> {
                       ),
                     ),
                     const SizedBox(height: 32),
+                    
+                    // --- NICKNAME INPUT ---
                     AppTextField(
-                      labelText: 'Nickname',
-                      hintText: 'Your display name',
-                      controller: _nicknameC,
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Nickname is required';
-                        }
-                        if (value.length < 3) {
-                          return 'Nickname must be at least 3 characters';
-                        }
-                        return null;
-                      },
+                      labelText: 'Nickname', hintText: 'Your display name', controller: _nicknameC,
+                      validator: (value) => (value == null || value.length < 3) ? 'Nickname must be at least 3 characters' : null,
                     ),
+                    
                     if (_isGoogleSignUp)
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
                         child: Text(
                           'From your Google account',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF00C6FB),
-                            fontStyle: FontStyle.italic,
-                          ),
+                          style: theme.textTheme.bodySmall?.copyWith(color: const Color(0xFF00C6FB), fontStyle: FontStyle.italic),
                         ),
                       ),
+                      
                     const SizedBox(height: 16),
+                    
+                    // --- DESCRIPTION INPUT ---
                     AppTextField(
-                      labelText: 'Description',
-                      hintText: 'Tell us about yourself',
-                      controller: _descriptionC,
-                      maxLines: 4,
-                      validator: (value) {
-                        // Description is optional
-                        return null;
-                      },
+                      labelText: 'Description', hintText: 'Tell us about yourself', controller: _descriptionC, maxLines: 4,
+                      validator: (value) => null, // Optional
                     ),
                     const SizedBox(height: 32),
                     Consumer<ProfileProvider>(

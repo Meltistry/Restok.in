@@ -52,4 +52,30 @@ class AuthService {
 
   // Auth state stream
   Stream<AuthState> get authStateChanges => _supabase.auth.onAuthStateChange;
+
+  Future<void> changePassword({
+    required String currentEmail,
+    required String oldPassword,
+    required String newPassword,
+  }) async {
+    try {
+      // 1. Verifikasi Password Lama dengan cara mencoba login ulang (Re-authentication)
+      // Ini memastikan orang yang mengganti password benar-benar pemilik akun
+      await _supabase.auth.signInWithPassword(
+        email: currentEmail,
+        password: oldPassword,
+      );
+
+      // 2. Jika login berhasil, update password baru
+      await _supabase.auth.updateUser(
+        UserAttributes(password: newPassword),
+      );
+      
+    } on AuthException catch (e) {
+      // Tangkap error spesifik dari Supabase
+      throw Exception(e.message);
+    } catch (e) {
+      throw Exception('Gagal mengganti password: $e');
+    }
+  }
 }

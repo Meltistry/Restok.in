@@ -1,18 +1,13 @@
-import "package:restokin/data/models/payment_model.dart";
-import "package:restokin/data/services/invoice_service.dart";
-import "package:restokin/data/services/supabase_client.dart";
-import "package:supabase_flutter/supabase_flutter.dart";
+import 'package:restokin/data/models/payment_model.dart';
+import 'package:restokin/data/services/supabase_client.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-/// Payment transaction service for paying an invoice.
+/// Simplified payment service: fetch and insert payments.
 class PaymentService {
-  PaymentService({
-    SupabaseClient? supabase,
-    InvoiceService? invoiceService,
-  })  : _supabase = supabase ?? SupabaseService.instance,
-        _invoiceService = invoiceService ?? InvoiceService();
+  PaymentService({SupabaseClient? supabase})
+    : _supabase = supabase ?? SupabaseService.instance;
 
   final SupabaseClient _supabase;
-  final InvoiceService _invoiceService;
 
   Future<PaymentModel> payInvoice({
     required String invoiceId,
@@ -28,50 +23,34 @@ class PaymentService {
       _Columns.payerId: payerId,
       _Columns.payeeId: payeeId,
       _Columns.amount: amount,
-      _Columns.status: "Paid", // TODO: align with backend status enum
+      _Columns.status: "paid",
       _Columns.paidAt: paidAt.toIso8601String(),
       if (proofImageUrl != null) _Columns.proofImageUrl: proofImageUrl,
       if (paymentTypeId != null) _Columns.paymentTypeId: paymentTypeId,
     };
 
-    try {
-      final response = await _supabase
-          .from(_Table.payments)
-          .insert(payload)
-          .select()
-          .maybeSingle();
+    final response = await _supabase
+        .from(_Table.payments)
+        .insert(payload)
+        .select()
+        .maybeSingle();
 
-      if (response == null) {
-        throw Exception("Payment insert returned empty response");
-      }
-
-      // Update invoice status to Paid.
-      await _invoiceService.updateInvoiceStatus(
-        invoiceId: invoiceId,
-        status: "Paid",
-        proofImageUrl: proofImageUrl,
-        paidAt: paidAt,
-      );
-
-      return PaymentModel.fromJson(_asJson(response));
-    } catch (e) {
-      throw Exception("Failed to pay invoice: $e");
+    if (response == null) {
+      throw Exception("Payment insert returned empty response");
     }
+
+    return PaymentModel.fromJson(_asJson(response));
   }
 
   Future<PaymentModel?> getPaymentByInvoiceId(String invoiceId) async {
-    try {
-      final response = await _supabase
-          .from(_Table.payments)
-          .select()
-          .eq(_Columns.invoiceId, invoiceId)
-          .maybeSingle();
+    final response = await _supabase
+        .from(_Table.payments)
+        .select()
+        .eq(_Columns.invoiceId, invoiceId)
+        .maybeSingle();
 
-      if (response == null) return null;
-      return PaymentModel.fromJson(_asJson(response));
-    } catch (e) {
-      throw Exception("Failed to fetch payment for invoice: $e");
-    }
+    if (response == null) return null;
+    return PaymentModel.fromJson(_asJson(response));
   }
 
   Map<String, dynamic> _asJson(dynamic row) {
@@ -82,16 +61,16 @@ class PaymentService {
 
 /// Table/column constants. Adjust to actual schema.
 class _Table {
-  static const String payments = "payments"; // TODO: confirm table name
+  static const String payments = "payments";
 }
 
 class _Columns {
-  static const String invoiceId = "invoice_id"; // TODO: map to actual column
-  static const String payerId = "payer_id"; // TODO: map to actual column
-  static const String payeeId = "payee_id"; // TODO: map to actual column
-  static const String amount = "amount"; // TODO: map to actual column
-  static const String proofImageUrl = "proof_image_url"; // TODO: map to actual column
-  static const String paymentTypeId = "payment_type_id"; // TODO: map to actual column
-  static const String status = "status"; // TODO: map to actual column
-  static const String paidAt = "paid_at"; // TODO: map to actual column
+  static const String invoiceId = "id_invoice";
+  static const String payerId = "payer_id"; // TODO: map when schema known
+  static const String payeeId = "payee_id"; // TODO: map when schema known
+  static const String amount = "amount";
+  static const String proofImageUrl = "proof_image_url";
+  static const String paymentTypeId = "payment_type_id";
+  static const String status = "status";
+  static const String paidAt = "paid_at";
 }
