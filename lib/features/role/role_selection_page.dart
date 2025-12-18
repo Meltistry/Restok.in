@@ -5,6 +5,8 @@ import 'package:provider/provider.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/widgets/gradient_scaffold.dart';
 import '../../state/profile_provider.dart';
+import '../../core/routing/app_router.dart';
+
 
 class RoleSelectionPage extends StatefulWidget {
   const RoleSelectionPage({super.key});
@@ -27,16 +29,17 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
       return;
     }
 
-    // Get current authenticated user
     final authUser = Supabase.instance.client.auth.currentUser;
     if (authUser == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Not authenticated'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('Not authenticated'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
-    // Get id_user from public.users table using email
     final userResponse = await Supabase.instance.client
         .from('users')
         .select('id_user')
@@ -47,15 +50,17 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
 
     if (userResponse == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('User not found'), backgroundColor: Colors.red),
+        const SnackBar(
+          content: Text('User not found'),
+          backgroundColor: Colors.red,
+        ),
       );
       return;
     }
 
     final userId = userResponse['id_user'] as int;
-
     final profileProvider = context.read<ProfileProvider>();
-    
+
     final success = await profileProvider.updateProfile(
       userId: userId,
       role: _selectedRole,
@@ -63,33 +68,37 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
 
     if (!mounted) return;
 
-    if (success) {
-      // Navigate based on role
-      if (_selectedRole == 'store_owner') {
-        Navigator.pushNamed(context, '/my-store');
-      } else {
-        // Navigate to restocker home (belum ada)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Restocker home page belum dibuat'),
-            backgroundColor: Colors.orange,
-          ),
-        );
-      }
-    } else {
+    if (!success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(profileProvider.error ?? 'Failed to update role'),
           backgroundColor: Colors.red,
         ),
       );
+      return;
     }
+
+    // ✅ ROLE-BASED NAVIGATION
+    if (_selectedRole == 'store_owner') {
+  Navigator.pushNamedAndRemoveUntil(
+    context,
+    AppRouter.myStore,
+    (route) => false,
+  );
+} else {
+  Navigator.pushNamedAndRemoveUntil(
+    context,
+    AppRouter.home,
+    (route) => false,
+  );
+}
+
   }
 
   @override
   Widget build(BuildContext context) {
     final profileProvider = context.watch<ProfileProvider>();
-    
+
     return GradientScaffold(
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -99,15 +108,15 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-        body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 40),
-                const Text(
-                  "Let's set things up",
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 40),
+              const Text(
+                "Let's set things up",
                 style: TextStyle(
                   color: Color(0xFFB8E6E6),
                   fontSize: 32,
@@ -115,7 +124,6 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
                 ),
               ),
               const SizedBox(height: 48),
-              
               const Text(
                 'What do you want\nto do with this app?',
                 style: TextStyle(
@@ -126,23 +134,19 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
                 ),
               ),
               const SizedBox(height: 32),
-              
-              // Store Owner Option
+
               _buildRoleOption(
                 label: 'I want to find people to restock my store',
                 value: 'store_owner',
               ),
               const SizedBox(height: 16),
-              
-              // Restocker Option
               _buildRoleOption(
                 label: 'I want to find stores that needs restocking',
                 value: 'restocker',
               ),
-              
+
               const Spacer(),
-              
-              // Continue Button
+
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
@@ -186,7 +190,7 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
     required String value,
   }) {
     final isSelected = _selectedRole == value;
-    
+
     return GestureDetector(
       onTap: () {
         setState(() {

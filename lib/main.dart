@@ -9,6 +9,7 @@ import 'state/auth_provider.dart';
 import 'state/store_provider.dart';
 import 'state/payment_provider.dart';
 import 'state/profile_provider.dart';
+import 'state/app_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,10 +35,12 @@ void main() async {
         ChangeNotifierProvider(create: (_) => StoreProvider()),
         ChangeNotifierProvider(create: (_) => PaymentProvider()),
         ChangeNotifierProvider(create: (_) => ProfileProvider()),
+        ChangeNotifierProvider(create: (_) => AppProvider()), // Add your AppProvider here
       ],
-      child: const RestokInApp(),
+      child: const RestokInApp(), // Use RestokInApp (from app.dart)
     ),
   );
 }
 
-final supabase = Supabase.instance.client;
+// Remove MainApp class - it's duplicate and not needed
+// Use RestokInApp from app.dart instead
