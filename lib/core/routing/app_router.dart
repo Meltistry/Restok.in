@@ -35,9 +35,7 @@ class AppRouter {
         );
 
       case selectPayment:
-        return MaterialPageRoute(
-          builder: (_) => const SelectPaymentPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const SelectPaymentPage());
 
       case inputPayment:
         return MaterialPageRoute(
@@ -46,14 +44,10 @@ class AppRouter {
         );
 
       case paymentSuccess:
-        return MaterialPageRoute(
-          builder: (_) => const PaymentSuccessPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const PaymentSuccessPage());
 
       case roleSelection:
-        return MaterialPageRoute(
-          builder: (_) => const RoleSelectionPage(),
-        );
+        return MaterialPageRoute(builder: (_) => const RoleSelectionPage());
 
       case myStore:
         return MaterialPageRoute(
@@ -72,13 +66,13 @@ class AppRouter {
   }
 
   static Map<String, WidgetBuilder> get routes => {
-        login: (context) => const LoginPage(),
-        register: (context) => const RegisterPage(),
-        createProfile: (context) => const CreateProfilePage(),
-        selectPayment: (context) => const SelectPaymentPage(),
-        inputPayment: (context) => const InputPaymentPage(),
-        paymentSuccess: (context) => const PaymentSuccessPage(),
-        roleSelection: (context) => const RoleSelectionPage(),
-        myStore: (context) => const MyStorePage(),
-      };
+    login: (context) => const LoginPage(),
+    register: (context) => const RegisterPage(),
+    createProfile: (context) => const CreateProfilePage(),
+    selectPayment: (context) => const SelectPaymentPage(),
+    inputPayment: (context) => const InputPaymentPage(),
+    paymentSuccess: (context) => const PaymentSuccessPage(),
+    roleSelection: (context) => const RoleSelectionPage(),
+    myStore: (context) => const MyStorePage(),
+  };
 }
