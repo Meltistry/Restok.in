@@ -37,7 +37,7 @@ class _RestockInvoicePreviewPageState extends State<RestockInvoicePreviewPage> {
     setState(() => _isLoading = true);
     try {
       await _cartService.submitRestock(
-        storeId: widget.store.idStore,
+        storeId: widget.store.idStore ?? 0,
         cartItems: widget.cart,
         proofImage: widget.proofImage,
       );

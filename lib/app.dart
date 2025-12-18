@@ -32,7 +32,7 @@ class RestokInApp extends StatelessWidget {
         '/payment-success': (_) => const PaymentSuccessPage(),
         '/role-selection': (_) => const RoleSelectionPage(),
         '/my-store': (_) => const MyStorePage(),
-         '/stores': (_) => const StoresListPage(),
+         '/browse-stores': (_) => const StoresListPage(),
       },
     );
   }

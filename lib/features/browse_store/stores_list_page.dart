@@ -102,9 +102,9 @@ class _StoresListPageState extends State<StoresListPage> {
                               width: 60, height: 60,
                               decoration: const BoxDecoration(shape: BoxShape.circle),
                               clipBehavior: Clip.hardEdge,
-                              child: store.storePic != null && store.storePic!.isNotEmpty
+                              child: store.storeEpic != null && store.storeEpic!.isNotEmpty
                                   ? CachedNetworkImage(
-                                      imageUrl: store.storePic!,
+                                      imageUrl: store.storeEpic!,
                                       fit: BoxFit.cover,
                                       placeholder: (context, url) => const CircularProgressIndicator(),
                                       errorWidget: (context, url, error) => const Icon(Icons.store, color: Color(0xFF1a7a8a)),
