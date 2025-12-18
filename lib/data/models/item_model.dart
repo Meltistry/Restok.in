@@ -22,7 +22,7 @@ class ItemModel {
       idItem: json['id_item'] as int?,
       idStore: json['id_store'] as int?,
       itemName: json['item_name'] as String? ?? '',
-      itemPrice: json['item_price'] as int? ?? 0,
+      itemPrice: (json['item_price'] as num?)?.toInt() ?? 0,
       createdAt: json['created_at'] != null
           ? DateTime.parse(json['created_at'] as String)
           : null,

@@ -275,6 +275,7 @@ class _AddStoreItemsPageState extends State<AddStoreItemsPage> {
             child: const Text('Edit', style: TextStyle(color: Colors.white)),
           ),
           const SizedBox(width: 8),
+
           Container(
             width: 40,
             height: 40,
@@ -284,9 +285,37 @@ class _AddStoreItemsPageState extends State<AddStoreItemsPage> {
             ),
             child: Checkbox(
               value: false,
-              onChanged: (value) {},
-              checkColor: Colors.white,
-              fillColor: WidgetStateProperty.all(const Color(0xFF1E7B7B)),
+              onChanged: (value) async {
+                if (value != true) return;
+
+                final confirm = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Delete Item'),
+                    content: const Text(
+                      'Are you sure you want to delete this item?',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: TextButton.styleFrom(
+                          foregroundColor: Colors.red,
+                        ),
+                        child: const Text('Delete'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirm != true) return;
+
+                final storeProvider = context.read<StoreProvider>();
+                await storeProvider.deleteItem(item.idItem);
+              },
             ),
           ),
         ],
