@@ -6,6 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:restokin/features/store_owner/add_store_items_page.dart';
 import '../../state/store_provider.dart';
 import 'create_store_page.dart';
+import '../home/home_page.dart';
 
 class MyStorePage extends StatefulWidget {
   const MyStorePage({super.key});
@@ -106,7 +107,13 @@ class _MyStorePageState extends State<MyStorePage> {
         backgroundColor: const Color(0xFF0A1A3A),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Color(0xFFB8E6E6)),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            Navigator.pushNamedAndRemoveUntil(
+              context,
+              '/home',
+              (route) => false,
+            );
+          },
         ),
         title: const Text(
           'My Store',
