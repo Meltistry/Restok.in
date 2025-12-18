@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../state/store_provider.dart';
 
 class CreateStorePage extends StatefulWidget {
@@ -45,24 +46,37 @@ class _CreateStorePageState extends State<CreateStorePage> {
   Future<void> _createStore() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // ===============================================
-    // START: HARDCODED USER ID = 1 UNTUK TESTING
+    // Get current authenticated user
+    final authUser = Supabase.instance.client.auth.currentUser;
+    if (authUser == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Not authenticated'), backgroundColor: Colors.red),
+      );
+      return;
+    }
 
-    // dan konversi String ke Int dihilangkan sementara.
-    // ===============================================
+    // Get id_user from public.users table using email
+    final userResponse = await Supabase.instance.client
+        .from('users')
+        .select('id_user')
+        .eq('email', authUser.email!)
+        .maybeSingle();
 
-    // Definisikan User ID hardcoded
-    const int userIdInt = 1;
+    if (!mounted) return;
 
-    // ===============================================
-    // END: HARDCODED USER ID
-    // ===============================================
+    if (userResponse == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User not found'), backgroundColor: Colors.red),
+      );
+      return;
+    }
+
+    final userId = userResponse['id_user'] as int;
 
     final storeProvider = context.read<StoreProvider>();
 
     final success = await storeProvider.createStore(
-      // Gunakan ID yang di-hardcode
-      userId: userIdInt,
+      userId: userId,
       storeName: _storeNameController.text.trim(),
       storeAddress: _storeAddressController.text.trim(),
       storeImagePath: _selectedImage?.path,

@@ -21,7 +21,7 @@ class _StoreDetailRestockPageState extends State<StoreDetailRestockPage> {
   @override
   void initState() {
     super.initState();
-    _futureItems = _storeService.getItemsByStore(widget.store.idStore);
+    _futureItems = _storeService.getStoreItems(widget.store.idStore);
   }
 
   void _updateQty(ItemModel item, int delta) {

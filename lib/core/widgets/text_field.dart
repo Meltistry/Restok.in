@@ -25,17 +25,37 @@ class AppTextField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      obscureText: obscureText,
-      keyboardType: keyboardType,
-      validator: validator,
-      maxLines: obscureText ? 1 : maxLines,
-      decoration: InputDecoration(
-        labelText: labelText,
-        hintText: hintText,
-        suffixIcon: suffixIcon,
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (labelText != null) ...[
+          Text(
+            labelText!,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+        ],
+        TextFormField(
+          controller: controller,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          validator: validator,
+          maxLines: obscureText ? 1 : maxLines,
+          style: const TextStyle(
+            color: Color(0xFF02173A), // text yang diketik dark navy
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+          decoration: InputDecoration(
+            hintText: hintText,
+            suffixIcon: suffixIcon,
+          ),
+        ),
+      ],
     );
   }
 }
