@@ -66,7 +66,7 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
     if (success) {
       // Navigate based on role
       if (_selectedRole == 'store_owner') {
-        Navigator.pushReplacementNamed(context, '/my-store');
+        Navigator.pushNamed(context, '/my-store');
       } else {
         // Navigate to restocker home (belum ada)
         ScaffoldMessenger.of(context).showSnackBar(
@@ -90,24 +90,23 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
   Widget build(BuildContext context) {
     final profileProvider = context.watch<ProfileProvider>();
     
-    return GradientScaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+    return PopScope(
+      canPop: false,
+      child: GradientScaffold(
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          automaticallyImplyLeading: false,
         ),
-      ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 40),
-              const Text(
-                "Let's set things up",
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 40),
+                const Text(
+                  "Let's set things up",
                 style: TextStyle(
                   color: Color(0xFFB8E6E6),
                   fontSize: 32,
@@ -178,6 +177,7 @@ class _RoleSelectionPageState extends State<RoleSelectionPage> {
           ),
         ),
       ),
+    ),
     );
   }
 
