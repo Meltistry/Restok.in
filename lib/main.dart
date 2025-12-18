@@ -9,7 +9,7 @@ import 'state/auth_provider.dart';
 import 'state/store_provider.dart';
 import 'state/payment_provider.dart';
 import 'state/profile_provider.dart';
-import 'state/app_provider.dart'; // Your AppProvider
+import 'state/app_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
